@@ -1,7 +1,8 @@
 function [DATA,HEADERS,NICEHEADERS]=CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 %**************************************************************************
 %
-% This is CO2SYS version 1.1 (SEPT-2011)
+% First   CO2SYS.m version: 1.1 (Sep 2011)
+% Current CO2SYS.m version: 2.0 (20 Dec 2016)
 %
 % CO2SYS is a MATLAB-version of the original CO2SYS for DOS. 
 % CO2SYS calculates and returns the state of the carbonate system of 
