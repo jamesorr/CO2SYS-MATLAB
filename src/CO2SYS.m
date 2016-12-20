@@ -91,17 +91,18 @@ function [DATA,HEADERS,NICEHEADERS]=CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPI
 %  11 = Mojica Prieto and Millero, 2002.					T:    0-45  S:  5-42. Seaw. scale. Real seawater
 %  12 = Millero et al, 2002									T: -1.6-35  S: 34-37. Seaw. scale. Field measurements.
 %  13 = Millero et al, 2006									T:    0-50  S:  1-50. Seaw. scale. Real seawater.
-%  14 = Millero et al, 2010									T:    0-50  S:  1-50. Seaw. scale. Real seawater.
+%  14 = Millero        2010  									T:    0-50  S:  1-50. Seaw. scale. Real seawater.
+%  15 = Waters, Millero, & Woosley 2014  							T:    0-50  S:  1-50. Seaw. scale. Real seawater.
 % 
 %  (****) Each element must be an integer that 
 %         indicates the KSO4 dissociation constants that are to be used,
 %         in combination with the formulation of the borate-to-salinity ratio to be used.
 %         Having both these choices in a single argument is somewhat awkward, 
 %         but it maintains syntax compatibility with the previous version.
-%  1 = KSO4 of Dickson & TB of Uppstrom 1979  (PREFERRED) 
-%  2 = KSO4 of Khoo    & TB of Uppstrom 1979
-%  3 = KSO4 of Dickson & TB of Lee 2010
-%  4 = KSO4 of Khoo    & TB of Lee 2010
+%  1 = KSO4 of Dickson 1990a   & TB of Uppstrom 1974  (PREFERRED) 
+%  2 = KSO4 of Khoo et al 1977 & TB of Uppstrom 1974
+%  3 = KSO4 of Dickson 1990a   & TB of Lee 2010
+%  4 = KSO4 of Khoo et al 1977 & TB of Lee 2010
 %
 %**************************************************************************%
 %
@@ -256,6 +257,12 @@ global fH RT;
 global K0 K1 K2 KW KB KF KS KP1 KP2 KP3 KSi;
 global TB TF TS TP TSi F;
 
+% Added by JM Epitalon
+% For computing derivative with respect to Ks, one has to call CO2sys with a perturbed K
+% Requested perturbation is passed through the following global variables
+global PertK    % Id of perturbed K
+global Perturb  % perturbation
+
 % Input conditioning
 
 % Determine lengths of input vectors
@@ -362,6 +369,27 @@ PengCorrection=zeros(ntps,1); F=WhichKs==7; PengCorrection(F)=TP(F);
 % The constants calculated for each sample will be on the appropriate pH scale!
 Constants(TempCi,Pdbari);
 
+% Added by JM Epitalon
+% For computing derivative with respect to Ks, one has to perturb the value of one K
+% Requested perturbation is passed through global variables PertK and Perturb
+if (! isempty(PertK))
+    switch PertK
+        case {'K0'}
+            K0 = K0 + Perturb;
+        case {'K1'}
+            K1 = K1 + Perturb;
+        case {'K2'}
+            K2 = K2 + Perturb;
+        case {'KB'}
+            KB = KB + Perturb;
+        case {'KW'}
+            KW = KW + Perturb;
+        case {'BOR'}
+            TB = TB + Perturb;
+    end
+end
+
+
 % Make sure fCO2 is available for each sample that has pCO2.
 F=find(p1==4 | p2==4); FC(F) = PC(F).*FugFac(F);
 
@@ -433,6 +461,27 @@ KIVEC=[K0 K1 K2 -log10(K1) -log10(K2) KW KB KF KS KP1 KP2 KP3 KSi];
 
 % Calculate the constants for all samples at output conditions
 Constants(TempCo,Pdbaro);
+
+% Added by JM Epitalon
+% For computing derivative with respect to Ks, one has to perturb the value of one K
+% Requested perturbation is passed through global variables PertK and Perturb
+if (! isempty(PertK))
+    switch PertK
+        case {'K0'}
+            K0 = K0 + Perturb;
+        case {'K1'}
+            K1 = K1 + Perturb;
+        case {'K2'}
+            K2 = K2 + Perturb;
+        case {'KB'}
+            KB = KB + Perturb;
+        case {'KW'}
+            KW = KW + Perturb;
+        case {'KW'}
+            TB = TB + Perturb;
+    end
+end
+
 
 % Calculate, for output conditions, using conservative TA and TC, pH, fCO2 and pCO2
 F=true(ntps,1); % i.e., do for all samples:
@@ -1096,6 +1145,27 @@ if any(F)
 	pK2 = pK20 + A2 + B2./TempK(F) + C2.*log(TempK(F));
 	K2(F) = 10.^-pK2;
 end
+F=(WhichKs==15);
+% Added by J. C. Orr on 4 Dec 2016
+if any(F)
+    % From Waters, Millero, Woosley 2014
+	% Mar. Chem., 165, 66-67, 2014
+        % Corrigendum to “The free proton concentration scale for seawater pH”.
+	% Effectively, this is an update of Millero (2010) formulation (WhichKs==14)
+	% Constants for K's on the SWS;
+	pK10 = -126.34048 + 6320.813./TempK(F) + 19.568224.*log(TempK(F));
+	A1 = 13.409160.*Sal(F).^0.5 + 0.031646.*Sal(F) - 5.1895e-5.*Sal(F).^2;
+	B1 = -531.3642.*Sal(F).^0.5 - 5.713.*Sal(F);
+	C1 = -2.0669166.*Sal(F).^0.5;
+	pK1 = pK10 + A1 + B1./TempK(F) + C1.*log(TempK(F));
+	K1(F) = 10.^-pK1;
+	pK20 =  -90.18333 + 5143.692./TempK(F) + 14.613358.*log(TempK(F));
+	A2 = 21.225890.*Sal(F).^0.5 + 0.12450870.*Sal(F) - 3.7243e-4.*Sal(F).^2;
+	B2 = -779.3444.*Sal(F).^0.5 - 19.91739.*Sal(F);
+	C2 = -3.3534679.*Sal(F).^0.5;
+	pK2 = pK20 + A2 + B2./TempK(F) + C2.*log(TempK(F));
+	K2(F) = 10.^-pK2;
+end
 
 %***************************************************************************
 %CorrectKsForPressureNow:
@@ -1682,6 +1752,8 @@ end % end nested function
 
 function varargout=CaSolubility(Sal, TempC, Pdbar, TC, pH)
 global K1 K2 TempK logTempK sqrSal Pbar RT WhichKs ntps
+global PertK    % Id of perturbed K
+global Perturb  % perturbation
 % '***********************************************************************
 % ' SUB CaSolubility, version 01.05, 05-23-97, written by Ernie Lewis.
 % ' Inputs: WhichKs%, Sal, TempCi, Pdbari, TCi, pHi, K1, K2
@@ -1787,6 +1859,18 @@ if any(F)
     KCa(F) = KCa(F).*exp((36   - 0.2 .*TempC(F)).*Pbar(F)./RT(F));
     KAr(F) = KAr(F).*exp((33.3 - 0.22.*TempC(F)).*Pbar(F)./RT(F));
 end
+% Added by JM Epitalon
+% For computing derivative with respect to KCa or KAr, one has to perturb the value of one K
+% Requested perturbation is passed through global variables PertK and Perturb
+if (! isempty(PertK))
+    switch PertK
+        case {'KSPA'}   % solubility Product for Aragonite
+            KAr = KAr + Perturb;
+        case {'KSPC'}   % for Calcite
+            KCa = KCa + Perturb;
+    end
+end
+
 % CalculateOmegasHere:
 H = 10.^(-pH);
 CO3 = TC.*K1.*K2./(K1.*H + H.*H + K1.*K2);
