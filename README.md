@@ -1,13 +1,13 @@
-CITATION:
+**CITATION:**
 - If you use CO2SYS.m, please cite van Heuven et al (2011).
 - If you use errors.m or derivnum.m, please cite Orr et al. (2017).
 
-CO2SYS versions:
+**CO2SYS versions:**
 
 - 1.1 (Sept 2011): van Heuven et al. (2011) 
 - 2.0 (Dec 20, 2016): Orr et al. (2017) - includes uncertainty propagation
 
-ABOUT CO2SYS:
+**ABOUT CO2SYS:**
 
 Here you will find a MATLAB-version of CO2SYS, originally written for DOS. CO2SYS calculates
 and returns a detailed state of the carbonate system for oceanographic water samples, if
@@ -20,7 +20,7 @@ http://cdiac.ornl.gov/oceans/co2rprt.html.  Since CO2SYS and the two new routine
 input of vectors, with just one call they can process many samples.  Each sample may have a
 different salinity, temperature, pH scale, dissociation constants, etc.
 
-HISTORY:
+**HISTORY:**
 
 The original version for DOS was written by Lewis and Wallace (1998). That was translated to
 MATLAB by Denis Pierrot at CIMAS, University of Miami, Miami, Florida. Then that code was
@@ -34,7 +34,7 @@ inconsistencies or have a more general bug report for CO2SYS.m, please notify S.
 ornl.gov). For any concerns about the error propagation routines (errors.m and derivnum.m),
 please contact James Orr (james.orr at lsce.ipsl.fr)
 
-INSTALLING:
+**INSTALLING:**
 
 Download the m-files in the src directory (CO2SYS.m, errors.m, and derivnum.m); you may also
 wish to download the examples in the examples directory.  Place these files in a local
@@ -46,13 +46,13 @@ addpath ("my_matlab_directory/my_subdir")
 Then run either of the examples in Matlab, or start using the CO2SYS routine straight
 away.
 
-COMPATIBILITY:
+**COMPATIBILITY:**
 
 Besides their use in MATLAB, the three functions (CO2SYS.m, derivnum.m, and errors.m) also work
 well under the GNU's MATLAB clone known as octave.
 
 
-REFERENCES:
+**REFERENCES:**
 
 Lewis, E. and Wallace, D. W. R.: Program Developed for CO2 System Calculations, ORNL/CDIAC-105,
 Carbon Dioxide Inf.  Anal. Cent., Oak Ridge Natl. Lab., Oak Ridge, Tenn., 38 pp., 1998.
