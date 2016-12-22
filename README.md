@@ -36,7 +36,7 @@ should produce nearly identical results when supplied with identical
 input. Indeed, close agreement between these different versions of CO2SYS was
 demonstrated by Orr et al. (2015).  In 2016, CO2SYS-MATLAB was modified to
 include error propagation (Orr et al., 2017): the main routine CO2SYS.m was
-slightly modified, while two new routeins were added (errors.m and derivnum.m)
+slightly modified, while two new routines were added (errors.m and derivnum.m)
 
 
 If you discover inconsistencies or have a more general bug report for CO2SYS.m,
