@@ -1,4 +1,5 @@
 **CITATION:**
+
 - If you use any CO2SYS related software, please cite the original work by Lewis and Wallace (1998).
 - If you use CO2SYS.m, please cite van Heuven et al (2011).
 - If you use errors.m or derivnum.m, please cite Orr et al. (2017).
@@ -29,13 +30,13 @@ The original version for DOS was written by Lewis and Wallace (1998). That was
 translated to MATLAB by Denis Pierrot at CIMAS, University of Miami, Miami,
 Florida. Then that code was vectorized, refined, and optimized for computational
 speed by Steven van Heuven, University of Groningen, The Netherlands. Although
-functionality was added, the output of the CO2SYS function has not changed. All
-versions of CO2SYS that are available at CDIAC (DOS, Excel for WINDOWS, MATLAB)
+functionality was added, the output of the CO2SYS function has not changed in
+form. All versions of CO2SYS that are available at CDIAC (DOS, Excel, MATLAB)
 should produce nearly identical results when supplied with identical
-input. Indeed, close agreement between them was demonstrated by Orr et
-al. (2015).  In 2016, CO2SYS-MATLAB was modified to include error propagation
-(Orr et al., 2017): the main routine CO2SYS.m was slightly modified, while two
-new routeins were added (errors.m and derivnum.m)
+input. Indeed, close agreement between these different versions of CO2SYS was
+demonstrated by Orr et al. (2015).  In 2016, CO2SYS-MATLAB was modified to
+include error propagation (Orr et al., 2017): the main routine CO2SYS.m was
+slightly modified, while two new routeins were added (errors.m and derivnum.m)
 
 
 If you discover inconsistencies or have a more general bug report for CO2SYS.m,
@@ -60,7 +61,7 @@ straight away.
 **COMPATIBILITY:**
 
 Besides their use in MATLAB, the three functions (CO2SYS.m, derivnum.m, and
-errors.m) also work well under the GNU's MATLAB clone known as octave.
+errors.m) also work well under octave, GNU's MATLAB clone.
 
 
 **REFERENCES:**
