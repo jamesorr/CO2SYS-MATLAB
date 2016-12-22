@@ -65,9 +65,11 @@ errors.m) also work well under octave, GNU's MATLAB clone.
 
 **EXAMPLES**
 
-Matlab scripts show examples of use of CO2SYS can be found in the examples
-directory. Using the two new routines is similar.  Those examples will be added
-soon in a notebooks directory.
+Example MATLAB scripts demonstrating use of CO2SYS can be found in the examples
+directory. Using the two new routines is similar, adding only a few new
+arguments, e.g., for input uncertainties.  Those examples will be added soon
+using interactive jupyter notebooks in a new 'notebooks' directory. Meanwhile
+just use "help errors" and "help derivnum" to find out more.
 
 **REFERENCES**
 
