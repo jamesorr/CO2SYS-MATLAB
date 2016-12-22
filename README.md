@@ -1,15 +1,15 @@
-**CITATION:**
+**CITATION**
 
 - If you use any CO2SYS related software, please cite the original work by Lewis and Wallace (1998).
 - If you use CO2SYS.m, please cite van Heuven et al (2011).
 - If you use errors.m or derivnum.m, please cite Orr et al. (2017).
 
-**CO2SYS-MATLAB versions:**
+**CO2SYS-MATLAB versions**
 
 - 1.1 (Sept 2011): van Heuven et al. (2011) 
 - 2.0 (Dec 20, 2016): Orr et al. (2017) - includes uncertainty propagation
 
-**ABOUT CO2SYS:**
+**ABOUT CO2SYS**
 
 Here you will find a MATLAB-version of CO2SYS, originally written for
 DOS. CO2SYS calculates and returns a detailed state of the carbonate system for
@@ -24,7 +24,7 @@ routines each allow input of vectors, with just one call they can process many
 samples.  Each sample may have a different salinity, temperature, pH scale,
 dissociation constants, etc.
 
-**HISTORY:**
+**HISTORY**
 
 The original version for DOS was written by Lewis and Wallace (1998). That was
 translated to MATLAB by Denis Pierrot at CIMAS, University of Miami, Miami,
@@ -45,12 +45,12 @@ please notify S. van Heuven (svheuven at gmail.com), Denis Pierrot
 about the error propagation routines (errors.m and derivnum.m), please contact
 James Orr (james.orr at lsce.ipsl.fr)
 
-**INSTALLING:**
+**INSTALLING**
 
 Download the m-files in the src directory (CO2SYS.m, errors.m, and derivnum.m);
 you may also wish to download the examples in the examples directory.  Place
 these files in a local directory that is in MATLAB's search path, or add the
-directory where they are located to MATLAB's search path). The latter can be
+directory where they are located to MATLAB's search path. The latter can be
 done with MATLAB's addpath command, for example
 
 addpath ("my_matlab_directory/my_subdir")
@@ -58,13 +58,18 @@ addpath ("my_matlab_directory/my_subdir")
 Then run either of the examples in Matlab, or start using the CO2SYS routine
 straight away.
 
-**COMPATIBILITY:**
+**COMPATIBILITY**
 
 Besides their use in MATLAB, the three functions (CO2SYS.m, derivnum.m, and
 errors.m) also work well under octave, GNU's MATLAB clone.
 
+**EXAMPLES**
 
-**REFERENCES:**
+Matlab scripts show examples of use of CO2SYS can be found in the examples
+directory. Using the two new routines is similar.  Those examples will be added
+soon in a notebooks directory.
+
+**REFERENCES**
 
 Lewis, E. and Wallace, D. W. R.: Program Developed for CO2 System Calculations,
 ORNL/CDIAC-105, Carbon Dioxide Inf.  Anal. Cent., Oak Ridge Natl. Lab., Oak
