@@ -13,15 +13,16 @@
 %**************************************************************************
 %
 %  **** SYNTAX:
-%  [DERIV,HEADERS]=derivnum(VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,...
-%                  SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,...
-%                  SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
+%  [DERIV, HEADERS, UNITS, HEADERS_ERR, UNITS_ERR]=...
+%                  derivnum(VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,...
+%                          SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,...
+%                          SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 % 
 %  **** SYNTAX EXAMPLES:
-%  [Result]          = derivnum('PAR1',2400,2200,1,2,35,0,25,4200,0,15,1,1,4,1)
+%  [Result]          = derivnum('par1',2400,2200,1,2,35,0,25,4200,0,15,1,1,4,1)
 %  [Result,Headers]  = derivnum('sit', 2400,   8,1,3,35,0,25,4200,0,15,1,1,4,1)
 %  [Result,Headers]  = derivnum('T', 500,   8,5,3,35,0,25,4200,0,15,1,1,4,1)
-%  [A]               = derivnum('Sal',2400,2000:10:2400,1,2,35,0,25,4200,0,15,1,1,4,1)
+%  [A]               = derivnum('S',2400,2000:10:2400,1,2,35,0,25,4200,0,15,1,1,4,1)
 %  [A]               = derivnum('K0',2400,2200,1,2,0:1:35,0,25,4200,0,15,1,1,4,1)
 %  [A]               = derivnum('K1',2400,2200,1,2,35,0,25,0:100:4200,0,15,1,1,4,1)
 %  
@@ -34,7 +35,7 @@
 %                     case 'par1'  :  Parameter 1 of the input pair (This is TAlk if PAR1TYPE is 1)
 %                     case 'par2'  :  Parameter 2 of the input pair (This is TAlk if PAR2TYPE is 1)
 %                     case 'sil', 'silt', 'tsil' or 'silicate'      : Silicate concentration
-%                     case 'phos', 'phost', 'tphos' or 'phosphate'  : Phosphate concentration
+%                     case 'phos', 'phost', 'tphos', 'phosphate', or 'pt'  : Phosphate concentration
 %                     case 't', 'temp' or 'temperature' : temperature
 %                     case 's', 'sal' or 'salinity'     : salinity
 %                     case 'K0','K1','K2','Kb','Kw','Kspa', 'Kspc', 'bor': dissociation constants & total boron
@@ -71,7 +72,10 @@
 %
 % Remark : if all input pairs are of the same type, derivatives of input pairs are omitted
 %
-function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+function [derivatives, headers, units, headers_err, units_err] = ...
+        derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE, SAL,TEMPIN, ...
+                  TEMPOUT,PRESIN,PRESOUT,SI,PO4, ...
+                  pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 
     % For computing derivative with respect to Ks, one has to call CO2sys with a perturbed K
     % Requested perturbation is passed through the following global variables
@@ -164,7 +168,26 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
     flag_dissoc_K = 0;   % False
     % names of dissociation constants
     K_names = {'K0', 'K1', 'K2', 'KB', 'KW', 'KSPA', 'KSPC', 'BOR'};    
+
+    % Units for derivatives and for errors
+    units_at = {'umol';'umol';'nmol';'total scale';'uatm kg';'uatm kg';'umol';'umol';...
+                 'umol';'kg';'kg';'ppm kg';...
+                 'nmol';'uatm kg';'uatm kg';'umol';'umol';....
+                 'umol';'kg';'kg';'ppm kg';
+                };
+ 
+    units_kg  = {'umol/kg';'umol/kg';'nmol/kg';'total scale';'uatm';'uatm';'umol/kg';'umol/kg';...
+                 'umol/kg';' ';' ';'ppm';...
+                 'nmol/kg';'uatm';'uatm';'umol/kg';'umol/kg';....
+                 'umol/kg';' ';' ';'ppm';
+                };
+
+    units_k = units_kg;
+ 
+    units_pco2 = units_kg;
     
+    units_err = units_kg;
+ 
     switch VARID
         case K_names
             flag_dissoc_K = 1;
@@ -177,7 +200,10 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
             [is_in_K_names, index] = ismember(VARID, K_names);
             perturbation = K(index) * 1.e-3;   % 0.1 percent of Kx value
             abs_dx = 2 * perturbation;
-              
+            denom = VARID;
+            denom_units = ' ';
+            units = units_k;
+            
         case {'PAR1', 'VAR1'}      % PAR1 (first variable of input pair) is perturbed
             % Define a relative delta
             delta = 1.e-6;
@@ -190,15 +216,38 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
             H2 = H(F) + H(F)*delta;
             PAR11(F) = -log10(H1) ;
             PAR12(F) = -log10(H2) ;
-            abs_dx(F) = H2 - H1;
-            
+            abs_dx(F) = (H2 - H1) * 1e9;
+           
             G = ~F;
             % Change slightly PAR1
             PAR11(G) = PAR1(G) - PAR1(G)*delta;
             PAR12(G) = PAR1(G) + PAR1(G)*delta;
             abs_dx(G) = PAR12(G) - PAR11(G);
 
-        case {'PAR2', 'VAR2'}    % PAR2 (second variable of input pair) is perturbed
+            switch PAR1TYPE(1)
+                case 1
+                  denom = 'ALK';
+                  denom_units = 'umol';
+                  units = units_at;
+                case 2
+                  denom = 'DIC';
+                  denom_units = 'umol';
+                  units = units_at;
+                case 3
+                  denom = 'H';
+                  denom_units = 'nmol';
+                  units = units_at;
+                case 4
+                  denom = 'pCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+                case 5
+                  denom = 'fCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+            end
+      
+      case {'PAR2', 'VAR2'}    % PAR2 (second variable of input pair) is perturbed
             % Define a relative delta
             delta = 1.e-6;
             % cases where second input variable is pH
@@ -209,7 +258,7 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
             H2 = H(F) + H(F)*delta;
             PAR21(F) = -log10(H1) ;
             PAR22(F) = -log10(H2) ;
-            abs_dx(F) = H2 - H1;
+            abs_dx(F) = (H2 - H1) * 1e9;
 
             G = ~F;
             % Change slightly PAR2
@@ -217,20 +266,49 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
             PAR22(G) = PAR2(G) + PAR2(G)*delta;
             abs_dx(G) = PAR22(G) - PAR21(G);
 
-        case {'SIL', 'TSIL', 'SILT', 'SILICATE'}    % Sil total
+             switch PAR2TYPE(1)
+                 case 1
+                  denom = 'ALK';
+                  denom_units = 'umol';
+                  units = units_at;
+                case 2
+                  denom = 'DIC';
+                  denom_units = 'umol';
+                  units = units_at;
+                case 3
+                  denom = 'H';
+                  denom_units = 'nmol';
+                  units = units_at;
+                case 4
+                  denom = 'pCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+                case 5
+                  denom = 'fCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+            end
+            
+       case {'SIL', 'TSIL', 'SILT', 'SILICATE', 'SIT'}    % Sil total
             % Define a relative delta
             delta = 1.e-3;
             % Change slightly temperature
             SI1 = SI - SI*delta;
             SI2 = SI + SI*delta;
             abs_dx = SI2 - SI1;
-        case {'PHOS', 'TPHOS', 'PHOST', 'PHOSPHATE'}    % Phos total
+            denom = 'Sit';
+            denom_units = 'umol';
+            units = units_at;
+       case {'PHOS', 'TPHOS', 'PHOST', 'PHOSPHATE', 'PT'}    % Phos total
             % Define a relative delta
             delta = 1.e-3;
             % Change slightly temperature
             PO41 = PO4 - PO4*delta;
             PO42 = PO4 + PO4*delta;
             abs_dx = PO42 - PO41;
+            denom = 'Pt';
+            denom_units = 'umol';
+            units = units_at;
         case {'T', 'TEMP', 'TEMPERATURE'}    % Temperature
             % Define a relative delta
             delta = 1.e-4;
@@ -238,6 +316,9 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
             TEMP1 = TEMPIN - TEMPIN*delta;
             TEMP2 = TEMPIN + TEMPIN*delta;
             abs_dx = TEMP2 - TEMP1;
+            denom = 'T';
+            denom_units = 'C';
+            units = units_kg;
         case {'S', 'SAL', 'SALINITY'}    % Salinity
             % Define a relative delta
             delta = 1.e-4;
@@ -245,6 +326,9 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
             SAL1 = SAL - SAL*delta;
             SAL2 = SAL + SAL*delta;
             abs_dx = SAL2 - SAL1;
+            denom = 'S';
+            denom_units = 'psu';
+            units = units_kg;
     end
     
     % PERTURBATION:
@@ -326,6 +410,12 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
         'Hout';'pCO2out';'fCO2out';'HCO3out';'CO3out';....
         'CO2out';'OmegaCAout';'OmegaARout';'xCO2out';
         };
+    headers_err = headers;
+    %units = {'umol';'umol';'nmol';'total scale';'uatm';'uatm';'umol';'umol';...
+    %    'umol';' ';' ';'ppm';...
+    %    'nmol';'uatm';'uatm';'umol';'umol';....
+    %    'umol';' ';' ';'ppm';
+    %    };
     % Initially, keep all headers except 'pHin'
     keep_head =  [1:3 5:21];
 
@@ -363,8 +453,18 @@ function [derivatives,headers] = derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL
     end
     cdel1 = cdel1(:,keep);
     cdel2 = cdel2(:,keep);
+    
     headers = headers(keep_head);
-
+    units = units(keep_head);
+    
+    headers_err = headers_err(keep_head);
+    units_err = units_err(keep_head);
+    
+    % concatenate strings to give each header its proper form, a partial derivative
+    headers = strcat('d', headers, '/', 'd', denom);
+    % concatenate in an analogous way for the units
+    units   = strcat('(',units, '/', denom_units,')');
+    
     % Centered difference
     dy = (cdel2 - cdel1);
 

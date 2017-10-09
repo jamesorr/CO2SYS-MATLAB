@@ -1,22 +1,23 @@
 % errors()
-% This subroutine does error propagation on the computation of carbonate system variables 
+% This subroutine propagates uncertainties for the marine carbonate chemistry calculations
 % from errors (or uncertainties) on six input 
 %  - pair of carbonate system variables 
 %  - nutrients (silicate and phosphate concentrations)
 %  - temperature and salinity
-% plus errors on dissociation constants pK0, pK1, pK2, pKb, pKw, pKspa and pKspc
+% plus errors in dissociation constants pK0, pK1, pK2, pKb, pKw, pKspa, and pKspc as well as total boron
 %
-% It computes numerical derivatives then applies error propagation using the method of moments.
-% The method of moments is a very general technique for estimating the second moment of a variable z
-% (variance or standard deviation) based on a first-order approximation to z.
+% It calls derivnum, which computes numerical derivatives, and then
+% it applies error propagation using the method of moments.
+% The latter is a general technique to estimate the 2nd moment of a variable z
+% (variance or standard deviation) based on a 1st-order approximation to z.
 %
 %**************************************************************************
 %
 %  **** SYNTAX:
-%  [std_err,headers]=errors(PAR1,PAR2,PAR1TYPE,PAR2TYPE,..  .
-%                  SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-%                  ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,r,...
-%                  pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
+%  [std_err, headers, units] = errors(PAR1,PAR2,PAR1TYPE,PAR2TYPE,..  .
+%                                     SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+%                                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,r,...
+%                                     pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 % 
 %  **** SYNTAX EXAMPLES:
 %  [Result]          = errors(2400,2200,1,2,35,0,25,4200,0,15,1,2,2,0.01,0.01,0,0,0,0,1,4,1)
@@ -36,14 +37,16 @@
 %   - ePO4, eSI      :  standard error (or uncertainty) on Phosphate and Silicate total concentrations
 %   - epK            :  standard error (or uncertainty) on all seven dissociation constants (a vector)
 %   - r              :  correlation coefficient between PAR1 AND PAR2 (typicaly 0)
-%   - others         :  same as input of subroutine  CO2sys() : scalar or vectors
+%   - others         :  same as input for subroutine  CO2SYS() : scalar or vectors
 %
 % All parameters may be scalars or vectors except epK.
-%   * epK must be vector of seven values : errors of pK0, pK1, pK2, pKb, pKw, pKspa and pKspc
-%     these errors are assumed to be equal for all input data.
+%   * epK must be vector of 8 values : errors of pK0, pK1, pK2, pKb, pKw, pKspa, pKspc, and Bt. 
+%     These errors are assumed to be the same for all rows of data.
+%     The 1st 7 values are in pK units, while the last value is the
+%     fractional relative error (a between 0.00 and 1.00)
 %
-%     if epK is empty (= ''), default values for epK are taken
-%     Default standard errors are :
+%     if epK is empty (= ''), this routine specifies default values.
+%     These default standard errors are :
 %        pK0   :  0.004 
 %        pK1   :  0.015
 %        pK2   :  0.03
@@ -51,19 +54,19 @@
 %        pKw   :  0.01    water dissociation
 %        pKspa :  0.02    solubility product of Aragonite 
 %        pKspc :  0.02    solubility product of Calcite
-%        TB    :  0.01    total boron
+%        TB    :  0.01    total boron (fractional relative error)
 %
 % In constrast, ePAR1, ePAR2, eS, eT, ePO4 and eSI, 
 %   - if vectors, are errors associated with each data point
 %   - if scalars, are one error value associated to all data points
 % The same for parameter "r".
 %
-% If 'r' is not 0, having a value between -1.0 and 1.0, it indicates the correlation 
+% If 'r' is nonzero with a value between -1.0 and 1.0, it indicates the correlation 
 % between uncertainties of the input pair of carbonate system variables.
 % By default, 'r' is zero. However, for some pairs the user may want to specify a
 % different value. For example, measurements of pCO2 and pH are often anti-correlated.
 % The same goes for two other pairs: 'CO2 and CO3' and 'pCO2 and
-% CO3'. But even for these cases, care is needed before using non-zero values of 'r'.
+% CO3'. But even for these cases, care is needed when using non-zero values of 'r'.
 % 
 % When the user wishes to propagate errors for an individual
 % measurement, 'r' should ALWAYS be zero if each member of the input pair is
@@ -79,14 +82,13 @@
 % 
 % For input pairs where one member is pH, this 'errors' routine automatically
 % inverses the sign of 'r'.
-% The reason for that is that the associated derivatives are computed in terms of 
+% That inversion is done because the associated derivatives are computed in terms of 
 % the hydrogen ion concentration H+, not pH. Therefore for each of these 6
 % flags, if the user wants to compute 'r' that should be done (1) using
 % the H+ concentration instead of pH, and (2) the sign of that computed 'r'
 % should be inversed when passing it as an argument to this routine.
-% For these cases, to express perfect anticorrelation with pH, the user should 
-% use 'r=1.0'. For all other flags (those without pH as a member), the sign
-% of 'r' should not be inversed.
+% To express perfect anticorrelation with pH, the user should 
+% use 'r=-1.0'. 
 % 
 %**************************************************************************
 %
@@ -120,8 +122,10 @@
 % Remark : if all input pairs are of the same type, standard error of input pairs are omitted
 %
 
-function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                  ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+function [total_error, headers, units] = ...
+        errors (PAR1, PAR2, PAR1TYPE, PAR2TYPE, SAL, TEMPIN, TEMPOUT, PRESIN, PRESOUT, SI, PO4,...
+                ePAR1, ePAR2, eSAL, eTEMP, eSI, ePO4, epK, r, ...
+                pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 
     global K0 K1 K2 KW KB KF KS KP1 KP2 KP3 KSi;
     
@@ -190,7 +194,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     K1K2CONSTANTS(1:ntps,1) = K1K2CONSTANTS(:) ;
     KSO4CONSTANTS(1:ntps,1) = KSO4CONSTANTS(:) ;
 
-    % Default value for epK
+    % Default values for epK
     if (isempty(epK))
         epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02, 0.01];
     else
@@ -220,6 +224,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     %     = -(1/ln[10]) * (dH / H)
     % Thus dH = - ln[1O] * [H] dpH
     eH =  log(10) * (H .* epH);     % Remove the minus sign because all errors (sigmas) are positive by definition
+    eH =  eH * 1e9            ;     % Convert from mol/kg to nmol/kg (to have same units as partial derivative)
     ePAR1(isH) = eH;
 
     % Same conversion for second variable
@@ -230,6 +235,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     r(isH) = -r(isH);       % Inverse sign of 'r' if PAR2 is pH
 
     eH =   log(10) * (H .* epH);
+    eH =  eH * 1e9             ;
     ePAR2(isH) = eH;
 
     % initialise total square error
@@ -238,7 +244,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     % Contribution of PAR1 to squared standard error
     if (any (ePAR1 != 0.0))
         % Compute sensitivities (partial derivatives)
-        [deriv1, headers] = derivnum ('PAR1',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        [deriv1, headers, units, headers_err, units_err] = derivnum ('PAR1',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
         err = deriv1 .* ePAR1;
         sq_err = resize(sq_err, size(err));
         sq_err = sq_err + err .* err;
@@ -247,7 +253,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     % Contribution of PAR2 to squared standard error
     if (any (ePAR2 != 0.0))
         % Compute sensitivities (partial derivatives)
-        [deriv2, headers] = derivnum ('PAR2',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        [deriv2, headers, units, headers_err, units_err] = derivnum ('PAR2',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
         err = deriv2 .* ePAR2;
         sq_err = resize(sq_err, size(err));
         sq_err = sq_err + err .* err;
@@ -270,7 +276,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     SI_valid = (SI != 0) & (eSI != 0);
     if (any (SI_valid))
         % Compute sensitivities (partial derivatives)
-        [deriv, headers] = derivnum ('sil',PAR1(SI_valid),PAR2(SI_valid),PAR1TYPE(SI_valid),PAR2TYPE(SI_valid),...
+        [deriv, headers, units, headers_err, units_err] = derivnum ('sil',PAR1(SI_valid),PAR2(SI_valid),PAR1TYPE(SI_valid),PAR2TYPE(SI_valid),...
                    SAL(SI_valid),TEMPIN(SI_valid),TEMPOUT(SI_valid),PRESIN(SI_valid),PRESOUT(SI_valid),...
                    SI(SI_valid),PO4(SI_valid),pHSCALEIN(SI_valid),K1K2CONSTANTS(SI_valid),KSO4CONSTANTS(SI_valid));
         err = deriv .* eSI(SI_valid);
@@ -287,7 +293,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     PO4_valid = (PO4 != 0) & (ePO4 != 0);
     if (any (PO4_valid))
         % Compute sensitivities (partial derivatives)
-        [deriv, headers] = derivnum ('phos',PAR1(PO4_valid),PAR2(PO4_valid),PAR1TYPE(PO4_valid),PAR2TYPE(PO4_valid),...
+        [deriv, headers, units, headers_err, units_err] = derivnum ('phos',PAR1(PO4_valid),PAR2(PO4_valid),PAR1TYPE(PO4_valid),PAR2TYPE(PO4_valid),...
                    SAL(PO4_valid),TEMPIN(PO4_valid),TEMPOUT(PO4_valid),PRESIN(PO4_valid),PRESOUT(PO4_valid),...
                    SI(PO4_valid),PO4(PO4_valid),pHSCALEIN(PO4_valid),K1K2CONSTANTS(PO4_valid),KSO4CONSTANTS(PO4_valid));
         err = deriv .* ePO4(PO4_valid);
@@ -299,7 +305,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     % Contribution of T (temperature) to squared standard error
     if (any (eTEMP != 0.0))
         % Compute sensitivities (partial derivatives)
-        [deriv, headers] = derivnum ('T',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        [deriv, headers, units, headers_err, units_err] = derivnum ('T',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
         err = deriv .* eTEMP;
         sq_err = resize(sq_err, size(err));
         sq_err = sq_err + err .* err;
@@ -308,7 +314,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
     % Contribution of S (salinity) to squared standard error
     if (any (eSAL != 0.0))
         % Compute sensitivities (partial derivatives)
-        [deriv, headers] = derivnum ('S',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        [deriv, headers, units, headers_err, units_err] = derivnum ('S',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
         err = deriv .* eSAL;
         sq_err = resize(sq_err, size(err));
         sq_err = sq_err + err .* err;
@@ -358,7 +364,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
             % compute error on Ki from that on pKi
             eKi = - epK(i) * Ki * log(10);
             % Compute sensitivities (partial derivatives)
-            [deriv, headers] = derivnum (cell2mat(Knames(1,i)),PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+            [deriv, headers, units, headers_err, units_err] = derivnum (cell2mat(Knames(1,i)),PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
             err = deriv .* eKi;
             %disp('deriv = '), disp(deriv);
             sq_err = resize(sq_err, size(err));
@@ -368,4 +374,7 @@ function [total_error, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN
 
     % Compute and return resulting total error (or uncertainty)
     total_error = sqrt (sq_err);
+    
+    headers = strcat('u(',headers_err,')');
+    units = strcat('(',units_err,')');
 end

@@ -211,7 +211,11 @@ function [DATA,HEADERS,NICEHEADERS]=CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPI
 % 
 %**************************************************************************
 %
-% This is version 1.1 (uploaded to CDIAC at SEP XXth, 2011):
+% This is version 2.0 (uploaded to CDIAC at SEP XXth, 2011):
+%
+% **** Changes since 1.1 (uploaded to CDIAC at June 11th, 2009):
+% - Modified to allow for error propagation (when called by errors.m and derivnum.m)
+% - Implementation of constants of Waters et al., 2014
 %
 % **** Changes since 1.01 (uploaded to CDIAC at June 11th, 2009):
 % - Function cleans up its global variables when done (if you loose variables, this may be the cause -- see around line 570)
