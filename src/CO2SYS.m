@@ -8,7 +8,7 @@ function [DATA,HEADERS,NICEHEADERS]=CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPI
 % CO2SYS calculates and returns the state of the carbonate system of 
 %    oceanographic water samples, if supplied with enough input.
 %
-% Please note that his software is intended to be exactly identical to the 
+% Please note that this software is intended to be exactly identical to the 
 %    DOS and Excel versions that have been released previously, meaning that
 %    results obtained should be very nearly indentical for identical input.
 % Additionally, several of the dissociation constants K1 and K2 that have 
@@ -213,9 +213,9 @@ function [DATA,HEADERS,NICEHEADERS]=CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPI
 %
 % This is version 2.0 (uploaded to CDIAC at SEP XXth, 2011):
 %
-% **** Changes since 1.1 (uploaded to CDIAC at June 11th, 2009):
-% - Modified to allow for error propagation (when called by errors.m and derivnum.m)
-% - Implementation of constants of Waters et al., 2014
+% **** Changes since 2.0
+%	- slight changes to allow error propagation
+%	- new option to choose K1 & K2 from Waters et al. (2014): fixes inconsistencies with Millero (2010) identified by Orr et al. (2015)
 %
 % **** Changes since 1.01 (uploaded to CDIAC at June 11th, 2009):
 % - Function cleans up its global variables when done (if you loose variables, this may be the cause -- see around line 570)
