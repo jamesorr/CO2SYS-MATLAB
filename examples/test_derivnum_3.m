@@ -1,5 +1,5 @@
 % Test of derivnum() with scalar input
-function test_derivnum_2()
+function test_derivnum_3()
     addpath ("~/Documents/CO2sys")
     
     WHICH_VAR = 1;  % w/ respect to Temperature
@@ -17,11 +17,13 @@ function test_derivnum_2()
     pHSCALEIN = 1;   % total scale
     K1K2CONSTANTS = 10; % Lueker 2000
     KSO4CONSTANTS = 3;  % KSO4 of Dickson & TB of Lee 2010
+    
     derivatives = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     
     % print title line
     "TCO2,    pCO2,    fCO2,    HCO3,    CO3,    CO2 ,    OmegaCa,    OmegaAr,    xCO2       (umol/kgSW, uatm)"
     % print derivatives
     derivatives
+    
  end
 

@@ -18,18 +18,18 @@
 %**************************************************************************
 %
 %  **** SYNTAX:
-%  [DERIV, HEADERS, UNITS, HEADERS_ERR, UNITS_ERR]=...
+%  [deriv, headers_der, units_der, headers_err, units_err]=...
 %                  derivnum(VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE,...
 %                          SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,...
 %                          SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 % 
 %  **** SYNTAX EXAMPLES:
-%  [Result]          = derivnum('par1',2400,2200,1,2,35,0,25,4200,0,15,1,1,4,1)
-%  [Result,Headers]  = derivnum('sit', 2400,   8,1,3,35,0,25,4200,0,15,1,1,4,1)
-%  [Result,Headers]  = derivnum(  'T',  500,   8,5,3,35,0,25,4200,0,15,1,1,4,1)
-%  [A]               = derivnum('S',2400,2000:10:2400,1,2,35,0,25,4200,0,15,1,1,4,1)
-%  [A]               = derivnum('K0',2400,2200,1,2,0:1:35,0,25,4200,0,15,1,1,4,1)
-%  [A]               = derivnum('K1',2400,2200,1,2,35,0,25,0:100:4200,0,15,1,1,4,1)
+%  [der, headers, units] = derivnum('par1',2400,2200,1,2,35,0,25,4200,0,15,1,1,4,1)
+%  [der, headers, units] = derivnum('sit', 2400,   8,1,3,35,0,25,4200,0,15,1,1,4,1)
+%  [deriv, headers]      = derivnum(  'T',  500,   8,5,3,35,0,25,4200,0,15,1,1,4,1)
+%  [deriv]               = derivnum('S',2400,2000:10:2400,1,2,35,0,25,4200,0,15,1,1,4,1)
+%  [deriv]               = derivnum('K0',2400,2200,1,2,0:1:35,0,25,4200,0,15,1,1,4,1)
+%  [deriv]               = derivnum('K1',2400,2200,1,2,35,0,25,0:100:4200,0,15,1,1,4,1)
 %  
 %**************************************************************************
 %

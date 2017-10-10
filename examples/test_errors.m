@@ -8,7 +8,7 @@ function result = test_errors ()
     PAR2TYPE = 2;
     SAL = 35;
     TEMPIN = 18;
-    TEMPOUT = 2; 
+    TEMPOUT = TEMPIN; 
     PRESIN = 0;
     PRESOUT = PRESIN;
     SI = 60;
@@ -24,14 +24,35 @@ function result = test_errors ()
     eSI = 4;
     ePO4 = 0.1;
  
-    % With no errors on Ks
+    % Correlation between errors in PAR1 and errors in PAR2
+    % Notes: 
+    % (1) This should normally be set to zero
+    % (2) This is NOT the correlation between PAR1 and PAR2;
+    %     rather it is the correlation between their errors!
+    r = 0; % correlation (R) between errors in PAR1 and errors in PAR2 
+    
+    % With no errors on equilibrium constants (epK) and total boron (eBt)
     epK=0;
+    eBt=0;
     result = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 
-    % With default errors on Ks
+    % With default errors on equil constants and total boron
     epK = '';
-    result = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    eBt = '';
+    [errs, headers, units] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+
+    % Same as just above but specify same errors (defaults) explicitly
+    epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02]; % absolute errors [pK units]
+    eBt = 0.01; % a 1% relative error
+    [errs, headers, units]  = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+
+    % Change default errors
+    epK = [0.002, 0.010, 0.02, 0.01, 0.01, 0.02, 0.02]; % absolute errors [pK units]
+    eBt = 0.02; % a 2% relative error
+    [errs, headers, units] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 end
 

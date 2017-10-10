@@ -23,7 +23,7 @@ function test_derivnum ()
     % print derivatives
 
     WHICH_VAR = 'Par1';  % w/ respect to Alk
-    deriv = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    [deriv, headers, units]= = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
 
     WHICH_VAR = 'par2';  % w/ respect to DIC
@@ -43,6 +43,22 @@ function test_derivnum ()
     printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
 
     WHICH_VAR = 'S';  % w/ respect to Salinity
+    deriv = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
+
+    WHICH_VAR = 'K1';  % w/ respect to K1 (1st dissociation for carbonic acid system)
+    deriv = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
+
+    WHICH_VAR = 'K2';  % w/ respect to K2 (2nd dissociation for carbonic acid system)
+    deriv = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
+
+    WHICH_VAR = 'Kb';  % w/ respect to Kb (dissociation constant for boric acid system) 
+    deriv = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
+
+    WHICH_VAR = 'bor';  % w/ respect to total boron (TB)
     deriv = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
 end

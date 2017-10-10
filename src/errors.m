@@ -14,20 +14,20 @@
 %**************************************************************************
 %
 %  **** SYNTAX:
-%  [std_err, headers, units] = errors(PAR1,PAR2,PAR1TYPE,PAR2TYPE,..  .
+%  [err, headers, units] = errors(PAR1,PAR2,PAR1TYPE,PAR2TYPE,..  .
 %                                     SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
 %                                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,...
 %                                     pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 % 
 %  **** SYNTAX EXAMPLES:
-%  [Result]          = errors(2400,2200,1,2,35,0,25,4200,0,15,1,2,2,0.01,0.01,0,0,0,0,0,1,4,1)
-%  [Result,Headers]  = errors(2400,   8,1,3,35,0,25,4200,0,15,1,2,0.001,0,0,0,0,0,0,0,1,4,1)
-%  [Result,Headers]  = errors(500,    8,5,3,35,0,25,4200,0,15,1,2,0.001,0,0,0,0,'','',0,1,4,1)
-%  [A]               = errors(2400,2000:10:2400,1,2,35,0,25,4200,0,15,2,2,0,0,0,0,'','',0,1,1,4,1)
-%  [A]               = errors(2400,2200,1,2,0:1:35,0,25,4200,0,15,1,2,2,0,0,0,0,'','',0,1,4,1)
+%  [Result]                = errors(2400,2200,1,2,35,10,10,0,0,15,1,2,2,0.01,0.01,0,0,0,0,0,1,4,1)
+%  [Result,Headers]        = errors(2400,   8,1,3,35,25,5,0,3000,15,1,2,0.001,0,0,0,0,0,0,0,1,4,1)
+%  [Result,Headers,Units]  = errors(500,    8,5,3,35,25,5,0,4000,15,1,2,0.001,0,0,0,0,'','',0,1,4,1)
+%  [A]                     = errors(2400,2000:10:2400,1,2,35,10,10,0,0,15,2,2,0,0,0,0,'','',0,1,1,4,1)
+%  [A]                     = errors(2400,2200,1,2,0:1:35,0,25,4200,0,15,1,2,2,0,0,0,0,'','',0,1,4,1)
 %  epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02];
-%  eBt = 0.02;
-%  [A]               = errors(2400,2200,1,2,35,0,25,0:100:4200,0,15,1,2,2,0,0,0,0,epK,eBt,0,1,4,1)
+%  eBt = 0.01;
+%  [A, hdr, units]   = errors(2400,2200,1,2,35,0,25,0:100:4200,0,15,1,2,2,0,0,0,0,epK,eBt,0,1,4,1)
 %  
 %**************************************************************************
 %
@@ -214,7 +214,7 @@ function [total_error, headers, units] = ...
     % Default value for eBt
     if (isempty(eBt))
         eBt = 0.01;
-    elseif (!isscalar)
+    elseif (!isscalar(eBt))
         error ('invalid parameter eBt (must be real scalar): ', ...
                eBt)
     end

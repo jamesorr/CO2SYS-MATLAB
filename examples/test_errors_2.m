@@ -26,15 +26,32 @@ function [result, headers] = test_errors_2 ()
     pHSCALEIN = 1;   % total scale
     K1K2CONSTANTS = 10; % Lueker 2000
     KSO4CONSTANTS = 3;  % KSO4 of Dickson & TB of Lee 2010
+    
+    % Correlation between errors in PAR1 and errors in PAR2
+    % Notes: 
+    % (1) This should normally be set to zero
+    % (2) This is NOT the correlation between PAR1 and PAR2;
+    %     rather it is the correlation between their errors!
+    r = 0; % correlation (R) between errors in PAR1 and errors in PAR2 
 
-    % With no errors on Ks
+    % With no errors on dissociation K's and total boron
     epK=0;
-    [result, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    eBt=0;
+    [errs, headers, units] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 
     % With default errors on Ks
     epK = '';
-    [result, headers] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    eBt = '';
+    [errs, headers, units] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    
+    % Correct for measurements made at 25°C at surface pressure for
+    % in situ samples collected at 1000 m where the in situ temperature was 10°C
+    TEMPIN  = 25 ; PRESIN = 0;
+    TEMPOUT = 10 ; PRESOUT = 1000;
+    [errs, headers, units] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    
 end
 
