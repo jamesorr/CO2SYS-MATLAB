@@ -16,34 +16,35 @@
 %  **** SYNTAX:
 %  [std_err, headers, units] = errors(PAR1,PAR2,PAR1TYPE,PAR2TYPE,..  .
 %                                     SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-%                                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,r,...
+%                                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,...
 %                                     pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 % 
 %  **** SYNTAX EXAMPLES:
-%  [Result]          = errors(2400,2200,1,2,35,0,25,4200,0,15,1,2,2,0.01,0.01,0,0,0,0,1,4,1)
-%  [Result,Headers]  = errors(2400,   8,1,3,35,0,25,4200,0,15,1,2,0.001,0,0,0,0,0,0,1,4,1)
-%  [Result,Headers]  = errors(500,   8,5,3,35,0,25,4200,0,15,1,2,0.001,0,0,0,0,'',0,1,4,1)
-%  [A]               = errors(2400,2000:10:2400,1,2,35,0,25,4200,0,15,2,2,0,0,0,0,'',0,1,1,4,1)
-%  [A]               = errors(2400,2200,1,2,0:1:35,0,25,4200,0,15,1,2,2,0,0,0,0,'',0,1,4,1)
+%  [Result]          = errors(2400,2200,1,2,35,0,25,4200,0,15,1,2,2,0.01,0.01,0,0,0,0,0,1,4,1)
+%  [Result,Headers]  = errors(2400,   8,1,3,35,0,25,4200,0,15,1,2,0.001,0,0,0,0,0,0,0,1,4,1)
+%  [Result,Headers]  = errors(500,    8,5,3,35,0,25,4200,0,15,1,2,0.001,0,0,0,0,'','',0,1,4,1)
+%  [A]               = errors(2400,2000:10:2400,1,2,35,0,25,4200,0,15,2,2,0,0,0,0,'','',0,1,1,4,1)
+%  [A]               = errors(2400,2200,1,2,0:1:35,0,25,4200,0,15,1,2,2,0,0,0,0,'','',0,1,4,1)
 %  epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02];
-%  [A]               = errors(2400,2200,1,2,35,0,25,0:100:4200,0,15,1,2,2,0,0,0,0,epK,0,1,4,1)
+%  eBt = 0.02;
+%  [A]               = errors(2400,2200,1,2,35,0,25,0:100:4200,0,15,1,2,2,0,0,0,0,epK,eBt,0,1,4,1)
 %  
 %**************************************************************************
 %
 % INPUT:
 %
-%   - ePAR1, ePAR2   :  standard error (or uncertainty) on PAR1 and PAR2 of input pair of carbonate system variables
-%   - eS, eT         :  standard error (or uncertainty) on Salinity and Temperature
-%   - ePO4, eSI      :  standard error (or uncertainty) on Phosphate and Silicate total concentrations
-%   - epK            :  standard error (or uncertainty) on all seven dissociation constants (a vector)
+%   - ePAR1, ePAR2   :  uncertainty of PAR1 and PAR2 of input pair of CO2 system variables (same units as PAR1 & PAR2)
+%   - eS, eT         :  uncertainty of Salinity and Temperature (same units as S and T)
+%   - ePO4, eSI      :  uncertainty of Phosphate and Silicate total concentrations (same units as PO4 and SI [umol/kg])
+%   - epK            :  uncertainty of all seven dissociation constants (a vector) [pK units]
+%   - eBt            :  uncertainty of total boron, given as fractional relative error (eBt=0.01 is a 1% error)
 %   - r              :  correlation coefficient between PAR1 AND PAR2 (typicaly 0)
 %   - others         :  same as input for subroutine  CO2SYS() : scalar or vectors
 %
 % All parameters may be scalars or vectors except epK.
-%   * epK must be vector of 8 values : errors of pK0, pK1, pK2, pKb, pKw, pKspa, pKspc, and Bt. 
+%   * epK must be vector of 7 values : errors of [pK0, pK1, pK2, pKb, pKw, pKspa, pKspc]. 
 %     These errors are assumed to be the same for all rows of data.
-%     The 1st 7 values are in pK units, while the last value is the
-%     fractional relative error (a between 0.00 and 1.00)
+%     These 7 values are in pK units
 %
 %     if epK is empty (= ''), this routine specifies default values.
 %     These default standard errors are :
@@ -54,7 +55,10 @@
 %        pKw   :  0.01    water dissociation
 %        pKspa :  0.02    solubility product of Aragonite 
 %        pKspc :  0.02    solubility product of Calcite
-%        TB    :  0.01    total boron (fractional relative error)
+%
+%   * eBt is a scalar real number, fractional relative error (between 0.00 and 1.00)
+%     for TB, where the default is eBt=0.01. It is assumed to be the same
+%     for all rows of data.
 %
 % In constrast, ePAR1, ePAR2, eS, eT, ePO4 and eSI, 
 %   - if vectors, are errors associated with each data point
@@ -68,7 +72,7 @@
 % The same goes for two other pairs: 'CO2 and CO3' and 'pCO2 and
 % CO3'. But even for these cases, care is needed when using non-zero values of 'r'.
 % 
-% When the user wishes to propagate errors for an individual
+% When the user propagates errors for an individual
 % measurement, 'r' should ALWAYS be zero if each member of the input pair is
 % measured independently. In this case, we are interested in the
 % correlation between the uncertainties in those measurements, not in
@@ -124,7 +128,7 @@
 
 function [total_error, headers, units] = ...
         errors (PAR1, PAR2, PAR1TYPE, PAR2TYPE, SAL, TEMPIN, TEMPOUT, PRESIN, PRESOUT, SI, PO4,...
-                ePAR1, ePAR2, eSAL, eTEMP, eSI, ePO4, epK, r, ...
+                ePAR1, ePAR2, eSAL, eTEMP, eSI, ePO4, epK, eBt, r, ...
                 pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 
     global K0 K1 K2 KW KB KF KS KP1 KP2 KP3 KSi;
@@ -196,18 +200,27 @@ function [total_error, headers, units] = ...
 
     % Default values for epK
     if (isempty(epK))
-        epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02, 0.01];
+        epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02];
     else
         % Check validity of epK
         if (length(epK) == 1 && epK == 0)
             % this means that the caller does not want to account for errors on dissoc. constants
-            epK = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
-        elseif (length(epK) != 8)
+            epK = [0.0 0.0 0.0 0.0 0.0 0.0 0.0];
+        elseif (length(epK) != 7)
             error ('invalid parameter epK: ', epK)
         end
     end
+    
+    % Default value for eBt
+    if (isempty(eBt))
+        eBt = 0.01;
+    elseif (!isscalar)
+        error ('invalid parameter eBt (must be real scalar): ', ...
+               eBt)
+    end
+
     % names of dissociation constants
-    Knames = {'K0','K1','K2','Kb','Kw','Kspa', 'Kspc', 'bor'};
+    Knames = {'K0','K1','K2','Kb','Kw','Kspa', 'Kspc'};
 
     % Convert error on pH to error on [H+] concentration
     % in case where first input variable is pH
@@ -223,7 +236,7 @@ function [total_error, headers, units] = ...
     %     = -(1/ln[10]) * d (ln[H])
     %     = -(1/ln[10]) * (dH / H)
     % Thus dH = - ln[1O] * [H] dpH
-    eH =  log(10) * (H .* epH);     % Remove the minus sign because all errors (sigmas) are positive by definition
+    eH =  log(10) * (H .* epH);     % Removed the minus sign because all errors (sigmas) are positive by definition
     eH =  eH * 1e9            ;     % Convert from mol/kg to nmol/kg (to have same units as partial derivative)
     ePAR1(isH) = eH;
 
@@ -370,6 +383,18 @@ function [total_error, headers, units] = ...
             sq_err = resize(sq_err, size(err));
             sq_err = sq_err + err .* err;
         end
+    end
+
+    % Contribution of Boron (total dissoloved boron concentration) to squared standard error
+    if (eBt != 0)
+        % Compute sensitivities (partial derivatives)
+        [deriv, headers, units, headers_err, units_err] = derivnum ('bor',PAR1,PAR2,PAR1TYPE,PAR2TYPE,...
+                   SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,...
+                   SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        err = deriv .* eBt;
+        new_size = [ntps size(err)(2)];
+        sq_err = resize(sq_err, new_size);
+        sq_err = sq_err + err .* err;
     end
 
     % Compute and return resulting total error (or uncertainty)
