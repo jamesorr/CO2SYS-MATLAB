@@ -4,11 +4,16 @@
 % with respect to input variables (two), plus nutrients (two), temperature and salinity,
 % dissociation constants, and total boron.
 %
-% It uses the central difference method, which consists to : 
-% - introduce a small perturbation delta (plus or minus) in one input
-% - and compute the induced delta in output variables
+% It uses central differences, introducing a small perturbation 
+% (plus and minus of a delta) in one input variable and computes the
+% resulting induced change in each output variable
 %
-% The ratio between PERTURBATION delta and input value is chosen 1.e-3
+% After numerical tests, the small PERTURBATION (delta) is chosen
+% as a fraction of a reference value as follows:
+% * 1.e-3 (0.1%) for the equilibrium constants and total boron 
+% * 1.e-6        for the pair of CO2 system input variables (PAR1, PAR2)
+% * 1.e-4        for temperature and salinity
+% * 1.e-3        for total dissolved inorganic P and Si (PO4, SI)
 %
 %**************************************************************************
 %
@@ -21,7 +26,7 @@
 %  **** SYNTAX EXAMPLES:
 %  [Result]          = derivnum('par1',2400,2200,1,2,35,0,25,4200,0,15,1,1,4,1)
 %  [Result,Headers]  = derivnum('sit', 2400,   8,1,3,35,0,25,4200,0,15,1,1,4,1)
-%  [Result,Headers]  = derivnum('T', 500,   8,5,3,35,0,25,4200,0,15,1,1,4,1)
+%  [Result,Headers]  = derivnum(  'T',  500,   8,5,3,35,0,25,4200,0,15,1,1,4,1)
 %  [A]               = derivnum('S',2400,2000:10:2400,1,2,35,0,25,4200,0,15,1,1,4,1)
 %  [A]               = derivnum('K0',2400,2200,1,2,0:1:35,0,25,4200,0,15,1,1,4,1)
 %  [A]               = derivnum('K1',2400,2200,1,2,35,0,25,0:100:4200,0,15,1,1,4,1)
@@ -30,17 +35,20 @@
 %
 % INPUT:
 %
-%   - VARID     :   (scalar) identifier of variable with respect to which one derives
+%   - VARID     :   character string to select the input variable for which
+%                   derivatives will be taken with respect to. 
+%                   This variable appears in denominator of each resulting derivative.
 %                   = variable length, case insensitive, character code
 %                     case 'par1'  :  Parameter 1 of the input pair (This is TAlk if PAR1TYPE is 1)
 %                     case 'par2'  :  Parameter 2 of the input pair (This is TAlk if PAR2TYPE is 1)
-%                     case 'sil', 'silt', 'tsil' or 'silicate'      : Silicate concentration
+%                     case 'sil', 'silt', 'tsil', 'silicate', or 'sit'     : Silicate concentration
 %                     case 'phos', 'phost', 'tphos', 'phosphate', or 'pt'  : Phosphate concentration
-%                     case 't', 'temp' or 'temperature' : temperature
-%                     case 's', 'sal' or 'salinity'     : salinity
-%                     case 'K0','K1','K2','Kb','Kw','Kspa', 'Kspc', 'bor': dissociation constants & total boron
+%                     case 't', 'temp' or 'temperature'           : temperature
+%                     case 's', 'sal', or 'salinity'              : salinity
+%                     case 'K0','K1','K2','Kb','Kw','Kspa', 'Kspc': dissociation constants 
+%                     case 'bor': total boron
 %
-%   - all others :  list of input parameters as in CO2SYS() subroutine (scalar or vectors)
+%   - all others :  same list of input parameters as in CO2SYS() subroutine (scalar or vectors)
 %
 %**************************************************************************%
 %
@@ -166,7 +174,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     
     % Flag for dissociation constant as perturbed variable 
     flag_dissoc_K = 0;   % False
-    % names of dissociation constants
+    % names of 7 dissociation constants and variable for total boron 
     K_names = {'K0', 'K1', 'K2', 'KB', 'KW', 'KSPA', 'KSPC', 'BOR'};    
 
     % Units for derivatives and for errors
@@ -200,7 +208,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             [is_in_K_names, index] = ismember(VARID, K_names);
             perturbation = K(index) * 1.e-3;   % 0.1 percent of Kx value
             abs_dx = 2 * perturbation;
-            denom = VARID;
+            denom_headers = VARID;
             denom_units = ' ';
             units = units_k;
             
@@ -208,125 +216,140 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             % Define a relative delta
             delta = 1.e-6;
           
-            % cases where first input variable is pH
+             switch PAR1TYPE(1)
+                case 1
+                  denom_headers = 'ALK';
+                  denom_units = 'umol';
+                  units = units_at;
+                  PAR1ref = 2300.; % umol/kg (global surface average, Orr et al., 2017)
+                case 2
+                  denom_headers = 'DIC';
+                  denom_units = 'umol';
+                  units = units_at;
+                  PAR1ref = 2000.; % umol/kg (global surface average, Orr et al., 2017)
+                case 3
+                  denom_headers = 'H';
+                  denom_units = 'nmol';
+                  units = units_at;
+                  PAR1ref = 10.; % nmol/kg (equivalent to pH=8.0)
+                case 4
+                  denom_headers = 'pCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+                  PAR1ref = 400.;  % uatm
+                case 5
+                  denom_headers = 'fCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+                  PAR1ref = 400.; % uatm
+            end
+      
+           % cases where first input variable is pH
             F = (PAR1TYPE == 3);
             H(F) = 10.^(-PAR1(F)) ; % [H+] in mol/kg
             % Change slightly [H+]
-            H1 = H(F) - H(F)*delta;
-            H2 = H(F) + H(F)*delta;
+            H1 = H(F) - PAR1ref*delta;
+            H2 = H(F) + PAR1ref*delta;
             PAR11(F) = -log10(H1) ;
             PAR12(F) = -log10(H2) ;
             abs_dx(F) = (H2 - H1) * 1e9;
            
             G = ~F;
             % Change slightly PAR1
-            PAR11(G) = PAR1(G) - PAR1(G)*delta;
-            PAR12(G) = PAR1(G) + PAR1(G)*delta;
+            PAR11(G) = PAR1(G) - PAR1ref*delta;
+            PAR12(G) = PAR1(G) + PAR1ref*delta;
             abs_dx(G) = PAR12(G) - PAR11(G);
 
-            switch PAR1TYPE(1)
-                case 1
-                  denom = 'ALK';
-                  denom_units = 'umol';
-                  units = units_at;
-                case 2
-                  denom = 'DIC';
-                  denom_units = 'umol';
-                  units = units_at;
-                case 3
-                  denom = 'H';
-                  denom_units = 'nmol';
-                  units = units_at;
-                case 4
-                  denom = 'pCO2';
-                  denom_units = 'uatm';
-                  units = units_pco2;
-                case 5
-                  denom = 'fCO2';
-                  denom_units = 'uatm';
-                  units = units_pco2;
-            end
-      
       case {'PAR2', 'VAR2'}    % PAR2 (second variable of input pair) is perturbed
             % Define a relative delta
             delta = 1.e-6;
+            switch PAR2TYPE(1)
+                case 1
+                  denom_headers = 'ALK';
+                  denom_units = 'umol';
+                  units = units_at;
+                  PAR2ref = 2300.; % umol/kg (global surface average, Orr et al., 2017)
+                case 2
+                  denom_headers = 'DIC';
+                  denom_units = 'umol';
+                  units = units_at;
+                  PAR2ref = 2000.; % umol/kg (global surface average, Orr et al., 2017)
+                case 3
+                  denom_headers = 'H';
+                  denom_units = 'nmol';
+                  units = units_at;
+                  PAR2ref = 10. ; % nmol/kg (equivalent to pH=8.0)
+                case 4
+                  denom_headers = 'pCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+                  PAR2ref = 400.; % uatm
+               case 5
+                  denom_headers = 'fCO2';
+                  denom_units = 'uatm';
+                  units = units_pco2;
+                  PAR2ref = 400.; % uatm
+           end
+            
+            
             % cases where second input variable is pH
             F = (PAR2TYPE == 3);
             H(F) = 10.^(-PAR2(F)) ; % H+ in mol/kg
             % Change slightly [H+]
-            H1 = H(F) - H(F)*delta;
-            H2 = H(F) + H(F)*delta;
+            H1 = H(F) - PAR2ref*delta;
+            H2 = H(F) + PAR2ref*delta;
             PAR21(F) = -log10(H1) ;
             PAR22(F) = -log10(H2) ;
             abs_dx(F) = (H2 - H1) * 1e9;
 
             G = ~F;
             % Change slightly PAR2
-            PAR21(G) = PAR2(G) - PAR2(G)*delta;
-            PAR22(G) = PAR2(G) + PAR2(G)*delta;
+            PAR21(G) = PAR2(G) - PAR2ref*delta;
+            PAR22(G) = PAR2(G) + PAR2ref*delta;
             abs_dx(G) = PAR22(G) - PAR21(G);
 
-             switch PAR2TYPE(1)
-                 case 1
-                  denom = 'ALK';
-                  denom_units = 'umol';
-                  units = units_at;
-                case 2
-                  denom = 'DIC';
-                  denom_units = 'umol';
-                  units = units_at;
-                case 3
-                  denom = 'H';
-                  denom_units = 'nmol';
-                  units = units_at;
-                case 4
-                  denom = 'pCO2';
-                  denom_units = 'uatm';
-                  units = units_pco2;
-                case 5
-                  denom = 'fCO2';
-                  denom_units = 'uatm';
-                  units = units_pco2;
-            end
-            
        case {'SIL', 'TSIL', 'SILT', 'SILICATE', 'SIT'}    % Sil total
             % Define a relative delta
             delta = 1.e-3;
+            SIref = 7.5; % umol/kg (global surface average, Orr et al., 2017)
             % Change slightly temperature
-            SI1 = SI - SI*delta;
-            SI2 = SI + SI*delta;
+            SI1 = SI - SIref*delta;
+            SI2 = SI + SIref*delta;
             abs_dx = SI2 - SI1;
-            denom = 'Sit';
+            denom_headers = 'Sit';
             denom_units = 'umol';
             units = units_at;
        case {'PHOS', 'TPHOS', 'PHOST', 'PHOSPHATE', 'PT'}    % Phos total
             % Define a relative delta
             delta = 1.e-3;
+            PO4ref = 0.5; % umol/kg (global surface average, Orr et al., 2017)
             % Change slightly temperature
-            PO41 = PO4 - PO4*delta;
-            PO42 = PO4 + PO4*delta;
+            PO41 = PO4 - PO4ref*delta;
+            PO42 = PO4 + PO4ref*delta;
             abs_dx = PO42 - PO41;
-            denom = 'Pt';
+            denom_headers = 'Pt';
             denom_units = 'umol';
             units = units_at;
         case {'T', 'TEMP', 'TEMPERATURE'}    % Temperature
             % Define a relative delta
             delta = 1.e-4;
+            TEMPref = 18.; % global surface mean (C)
             % Change slightly temperature
-            TEMP1 = TEMPIN - TEMPIN*delta;
-            TEMP2 = TEMPIN + TEMPIN*delta;
+            TEMP1 = TEMPIN - TEMPref*delta;
+            TEMP2 = TEMPIN + TEMPref*delta;
             abs_dx = TEMP2 - TEMP1;
-            denom = 'T';
+            denom_headers = 'T';
             denom_units = 'C';
             units = units_kg;
         case {'S', 'SAL', 'SALINITY'}    % Salinity
             % Define a relative delta
             delta = 1.e-4;
+            SALref = 35.;
             % Change slightly temperature
-            SAL1 = SAL - SAL*delta;
-            SAL2 = SAL + SAL*delta;
+            SAL1 = SAL - SALref*delta;
+            SAL2 = SAL + SALref*delta;
             abs_dx = SAL2 - SAL1;
-            denom = 'S';
+            denom_headers = 'S';
             denom_units = 'psu';
             units = units_kg;
     end
@@ -461,7 +484,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     units_err = units_err(keep_head);
     
     % concatenate strings to give each header its proper form, a partial derivative
-    headers = strcat('d', headers, '/', 'd', denom);
+    headers = strcat('d', headers, '/', 'd', denom_headers);
     % concatenate in an analogous way for the units
     units   = strcat('(',units, '/', denom_units,')');
     
