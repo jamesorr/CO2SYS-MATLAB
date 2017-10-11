@@ -23,7 +23,7 @@ function test_derivnum ()
     % print derivatives
 
     WHICH_VAR = 'Par1';  % w/ respect to Alk
-    [deriv, headers, units]= = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+    [deriv, headers, units] = derivnum(WHICH_VAR,PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     printf ("%e  %e  %e  %e  %e  %e\n", deriv(1), deriv(2), deriv(6), deriv(4), deriv(5), deriv(8));
 
     WHICH_VAR = 'par2';  % w/ respect to DIC
