@@ -160,14 +160,14 @@ function [derivatives, headers, units, headers_err, units_err] = ...
 
     % Default values : not perturbed
     % no change on PAR1 and PAR2
-    PAR11 = PAR12 = PAR1;
-    PAR21 = PAR22 = PAR2;
+    PAR11 = PAR1; PAR12 = PAR1;
+    PAR21 = PAR2; PAR22 = PAR2;
     % no change on Sil total and Phos total
-    SI1 = SI2 = SI;
-    PO41  = PO42  = PO4;
+    SI1 = SI; SI2 = SI;
+    PO41  = PO4; PO42  = PO4;
     % no change on T and S
-    TEMP1 = TEMP2 = TEMPIN;
-    SAL1 = SAL2 = SAL;
+    TEMP1 = TEMPIN; TEMP2 = TEMPIN;
+    SAL1 = SAL; SAL2 = SAL;
 
     % Create empty vector for abs_dx (absolute delta)
     abs_dx  = nan(ntps,1);
@@ -180,13 +180,13 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     % Units for derivatives and for errors
     units_at = {'umol';'umol';'nmol';'total scale';'uatm kg';'uatm kg';'umol';'umol';...
                  'umol';'kg';'kg';'ppm kg';...
-                 'nmol';'uatm kg';'uatm kg';'umol';'umol';....
+                 'nmol';'uatm kg';'uatm kg';'umol';'umol';...
                  'umol';'kg';'kg';'ppm kg';
                 };
  
     units_kg  = {'umol/kg';'umol/kg';'nmol/kg';'total scale';'uatm';'uatm';'umol/kg';'umol/kg';...
                  'umol/kg';' ';' ';'ppm';...
-                 'nmol/kg';'uatm';'uatm';'umol/kg';'umol/kg';....
+                 'nmol/kg';'uatm';'uatm';'umol/kg';'umol/kg';...
                  'umol/kg';' ';' ';'ppm';
                 };
 
@@ -363,7 +363,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
         PertK = upper(VARID);
         Perturb = -perturbation;
     end
-    cdel1 = CO2SYS ( 
+    cdel1 = CO2SYS ( ...
         PAR11,PAR21,PAR1TYPE,PAR2TYPE,SAL1,TEMP1,TEMPOUT,PRESIN,PRESOUT,SI1,PO41,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     % Compute [H+]
     if (ndims(cdel1) == 2)
@@ -382,7 +382,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
         PertK = upper(VARID);
         Perturb = perturbation;
     end
-    cdel2 = CO2SYS (
+    cdel2 = CO2SYS ( ...
         PAR12,PAR22,PAR1TYPE,PAR2TYPE,SAL2,TEMP2,TEMPOUT,PRESIN,PRESOUT,SI2,PO42,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     % Compute [H+]
     if (ndims(cdel2) == 2)
@@ -430,13 +430,13 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     % We will drop also some column headers
     headers = {'TAlk';'TCO2';'Hin';'pHin';'pCO2in';'fCO2in';'HCO3in';'CO3in';...
         'CO2in';'OmegaCAin';'OmegaARin';'xCO2in';...
-        'Hout';'pCO2out';'fCO2out';'HCO3out';'CO3out';....
+        'Hout';'pCO2out';'fCO2out';'HCO3out';'CO3out';...
         'CO2out';'OmegaCAout';'OmegaARout';'xCO2out';
         };
     headers_err = headers;
     %units = {'umol';'umol';'nmol';'total scale';'uatm';'uatm';'umol';'umol';...
     %    'umol';' ';' ';'ppm';...
-    %    'nmol';'uatm';'uatm';'umol';'umol';....
+    %    'nmol';'uatm';'uatm';'umol';'umol';...
     %    'umol';' ';' ';'ppm';
     %    };
     % Initially, keep all headers except 'pHin'
@@ -453,9 +453,9 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             col_number = PAR1TYPE(1) + 1;
         end
         % Exclude input parameters PAR1
-        A = (keep != col_number);
+        A = (keep ~= col_number);
         keep = keep (A);
-        A = (keep_head != col_number);
+        A = (keep_head ~= col_number);
         keep_head = keep_head (A);
     end
     % if all parameter PAR2 are of the same type
@@ -469,9 +469,9 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             col_number = PAR2TYPE(1) + 1;
         end
         % Exclude input parameters PAR2
-        A = (keep != col_number);
+        A = (keep ~= col_number);
         keep = keep (A);
-        A = (keep_head != col_number);
+        A = (keep_head ~= col_number);
         keep_head = keep_head (A);
     end
     cdel1 = cdel1(:,keep);

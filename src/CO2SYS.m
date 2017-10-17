@@ -377,7 +377,7 @@ Constants(TempCi,Pdbari);
 % Added by JM Epitalon
 % For computing derivative with respect to Ks, one has to perturb the value of one K
 % Requested perturbation is passed through global variables PertK and Perturb
-if (! isempty(PertK))
+if (~ isempty(PertK))
     switch PertK
         case {'K0'}
             K0 = K0 + Perturb;
@@ -470,7 +470,7 @@ Constants(TempCo,Pdbaro);
 % Added by JM Epitalon
 % For computing derivative with respect to Ks, one has to perturb the value of one K
 % Requested perturbation is passed through global variables PertK and Perturb
-if (! isempty(PertK))
+if (~ isempty(PertK))
     switch PertK
         case {'K0'}
             K0 = K0 + Perturb;
@@ -1867,7 +1867,7 @@ end
 % Added by JM Epitalon
 % For computing derivative with respect to KCa or KAr, one has to perturb the value of one K
 % Requested perturbation is passed through global variables PertK and Perturb
-if (! isempty(PertK))
+if (~ isempty(PertK))
     switch PertK
         case {'KSPA'}   % solubility Product for Aragonite
             KAr = KAr + Perturb;
