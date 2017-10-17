@@ -258,8 +258,10 @@ function [total_error, headers, units] = ...
     if (any (ePAR1 ~= 0.0))
         % Compute sensitivities (partial derivatives)
         [deriv1, headers, units, headers_err, units_err] = derivnum ('PAR1',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
-        err = deriv1 .* ePAR1;
-	sq_err = err*0. + sq_err
+        %err = deriv1 .* ePAR1;
+        err = bsxfun(@times,deriv1,ePAR1);
+	%sq_err = err*0. + sq_err;
+	sq_err = bsxfun(@plus,err*0., sq_err);
         sq_err = sq_err + err .* err;
     end
 
@@ -267,8 +269,10 @@ function [total_error, headers, units] = ...
     if (any (ePAR2 ~= 0.0))
         % Compute sensitivities (partial derivatives)
         [deriv2, headers, units, headers_err, units_err] = derivnum ('PAR2',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
-        err = deriv2 .* ePAR2;
-	sq_err = err*0. + sq_err
+        %err = deriv2 .* ePAR2;
+        err = bsxfun(@times,deriv2,ePAR2);
+	%sq_err = err*0. + sq_err;
+	sq_err = bsxfun(@plus,err*0., sq_err);
         sq_err = sq_err + err .* err;
     end
 
@@ -277,7 +281,8 @@ function [total_error, headers, units] = ...
         % Compute covariance from correlation coeff. & std deviations
         covariance = r .* ePAR1 .* ePAR2;
         % Contribution to squared error
-        err2 = 2 * deriv1 .* deriv2 .* covariance;
+        %err2 = 2 * deriv1 .* deriv2 .* covariance;
+        err2 = bsxfun(@times,2 * deriv1 .* deriv2, covariance);
         sq_err = sq_err + err2;
     end
     
@@ -292,9 +297,10 @@ function [total_error, headers, units] = ...
         [deriv, headers, units, headers_err, units_err] = derivnum ('sil',PAR1(SI_valid),PAR2(SI_valid),PAR1TYPE(SI_valid),PAR2TYPE(SI_valid),...
                    SAL(SI_valid),TEMPIN(SI_valid),TEMPOUT(SI_valid),PRESIN(SI_valid),PRESOUT(SI_valid),...
                    SI(SI_valid),PO4(SI_valid),pHSCALEIN(SI_valid),K1K2CONSTANTS(SI_valid),KSO4CONSTANTS(SI_valid));
-        err = deriv .* eSI(SI_valid);
+        %err = deriv .* eSI(SI_valid);
+        err = bsxfun(@times,deriv,eSI(SI_valid));
         new_size = [ntps size(err,2)];
-	sq_err = zeros(new_size) + sq_err
+	sq_err = zeros(new_size) + sq_err;
         sq_err(SI_valid,:) = sq_err(SI_valid,:) + err .* err;
     end
 
@@ -309,9 +315,10 @@ function [total_error, headers, units] = ...
         [deriv, headers, units, headers_err, units_err] = derivnum ('phos',PAR1(PO4_valid),PAR2(PO4_valid),PAR1TYPE(PO4_valid),PAR2TYPE(PO4_valid),...
                    SAL(PO4_valid),TEMPIN(PO4_valid),TEMPOUT(PO4_valid),PRESIN(PO4_valid),PRESOUT(PO4_valid),...
                    SI(PO4_valid),PO4(PO4_valid),pHSCALEIN(PO4_valid),K1K2CONSTANTS(PO4_valid),KSO4CONSTANTS(PO4_valid));
-        err = deriv .* ePO4(PO4_valid);
+        %err = deriv .* ePO4(PO4_valid);
+        err = bsxfun(@times,deriv,ePO4(PO4_valid));
         new_size = [ntps size(err,2)];
-	sq_err = zeros(new_size) + sq_err
+	sq_err = zeros(new_size) + sq_err;
         sq_err(PO4_valid,:) = sq_err(PO4_valid,:) + err .* err;
     end
 
@@ -319,8 +326,9 @@ function [total_error, headers, units] = ...
     if (any (eTEMP ~= 0.0))
         % Compute sensitivities (partial derivatives)
         [deriv, headers, units, headers_err, units_err] = derivnum ('T',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
-        err = deriv .* eTEMP;
-	sq_err = err*0. + sq_err
+        %err = deriv .* eTEMP;
+        err = bsxfun(@times,deriv,eTEMP);
+	sq_err = err*0. + sq_err;
         sq_err = sq_err + err .* err;
     end
 
@@ -328,8 +336,9 @@ function [total_error, headers, units] = ...
     if (any (eSAL ~= 0.0))
         % Compute sensitivities (partial derivatives)
         [deriv, headers, units, headers_err, units_err] = derivnum ('S',PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
-        err = deriv .* eSAL;
-	sq_err = err*0. + sq_err
+        %err = deriv .* eSAL;
+        err = bsxfun(@times,deriv,eSAL);
+	sq_err = err*0. + sq_err;
         sq_err = sq_err + err .* err;
     end
 
@@ -378,9 +387,10 @@ function [total_error, headers, units] = ...
             eKi = - epK(i) * Ki * log(10);
             % Compute sensitivities (partial derivatives)
             [deriv, headers, units, headers_err, units_err] = derivnum (cell2mat(Knames(1,i)),PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
-            err = deriv .* eKi;
+            %err = deriv .* eKi;
+            err = bsxfun(@times, deriv, eKi);
             %disp('deriv = '), disp(deriv);
-	    sq_err = err*0. + sq_err
+	    sq_err = err*0. + sq_err;
             sq_err = sq_err + err .* err;
         end
     end
@@ -393,7 +403,7 @@ function [total_error, headers, units] = ...
                    SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
         err = deriv .* eBt;
         new_size = [ntps size(err,2)];
-	sq_err = zeros(new_size) + sq_err
+	sq_err = zeros(new_size) + sq_err;
         sq_err = sq_err + err .* err;
     end
 

@@ -492,6 +492,12 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     dy = (cdel2 - cdel1);
 
     % Compute ratio dy/dx
-    derivatives = dy ./ abs_dx;
+    if (isscalar(abs_dx))
+        derivatives = dy ./ abs_dx;
+    else
+        derivatives = bsxfun(@rdivide, dy, abs_dx);
+    end
+
+
 
 end
