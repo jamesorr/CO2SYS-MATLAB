@@ -41,7 +41,7 @@
 %   - r              :  correlation coefficient between PAR1 AND PAR2 (typicaly 0)
 %   - others         :  same as input for subroutine  CO2SYS() : scalar or vectors
 %
-% All parameters may be scalars or vectors except epK.
+% All parameters may be scalars or vectors except epK and eBt.
 %   * epK must be vector of 7 values : errors of [pK0, pK1, pK2, pKb, pKw, pKspa, pKspc]. 
 %     These errors are assumed to be the same for all rows of data.
 %     These 7 values are in pK units
@@ -211,12 +211,15 @@ function [total_error, headers, units] = ...
         end
     end
     
-    % Default value for eBt
+    % Default value for eBt (also check for incorrectly specified values
     if (isempty(eBt))
         eBt = 0.01;
-    elseif (~isscalar(eBt))
-        error ('invalid parameter eBt (must be real scalar): ', ...
-               eBt)
+    elseif ( ~(isscalar(eBt)) )
+        error ('invalid parameter eBt (must be scalar): ')
+    elseif ( isscalar(eBt))
+        if (eBt < 0 || eBt > 1)
+           error ('The "eBt" input argument is the fractional error. It must be between 0 and 1. Default is 0.01 (a 1% error).')
+	end
     end
 
     % names of dissociation constants
