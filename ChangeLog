@@ -1,5 +1,9 @@
 ChangeLog
 
+version 2.0.2, 2017-10-17
+-----------------------------------
+	- changed Octave enhancemnts (!, size, resize) to be MATLAB compatible (~, ...) 
+
 version 2.0.1, 2017-10-11
 -----------------------------------
 	- new routines to support use of TEOS-10 standards (Conserrative temperature, Aboslute salinity)
