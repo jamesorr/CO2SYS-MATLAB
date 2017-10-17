@@ -5,6 +5,7 @@ function [result, headers] = test_errors_2 ()
    % 2nd test : 6 records at increasing depth  with NO NUTRIENTS
    % ----------------------------------------
 
+    r = 0; % correlation (R) between errors in PAR1 and errors in PAR2 
     ePAR1 = 2;    % Alk
     ePAR2 = 2;    % DIC
     eSAL = 0;
@@ -32,11 +33,11 @@ function [result, headers] = test_errors_2 ()
     % (1) This should normally be set to zero
     % (2) This is NOT the correlation between PAR1 and PAR2;
     %     rather it is the correlation between their errors!
-    r = 0; % correlation (R) between errors in PAR1 and errors in PAR2 
 
     % With no errors on dissociation K's and total boron
     epK=0;
     eBt=0;
+
     [errs, headers, units] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
                      ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 

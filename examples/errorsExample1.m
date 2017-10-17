@@ -22,19 +22,26 @@ function result = test_errors ()
     eSI = 4;
     ePO4 = 0.1;
  
-    % With no errors on Ks
+    % With no errors on Ks nor uncertainty in total boron
     epK=0;
+    eBt=0;
+
+    % No correlation between PAR1 and PAR2
+    r=0;
     result = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,0,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 
     % With default errors on Ks
     epK = '';
+    eBt = '';
     result = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,0,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 
     % With default errors on Ks and some correlation between input pairs
     epK = '';
+    eBt = 0.01;
+    r=0.02;     
     result = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
-                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,0.02, pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+                     ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r, pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
 end
 
