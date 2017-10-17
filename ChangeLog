@@ -2,6 +2,7 @@ ChangeLog
 
 version 2.0.2, 2017-10-17
 -----------------------------------
+	- correctoins so that errors.m works when there a vectors in input
 	- changed Octave enhancemnts (!, size, resize) to be MATLAB compatible (~, ...) 
 
 version 2.0.1, 2017-10-11
