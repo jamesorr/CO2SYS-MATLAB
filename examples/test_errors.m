@@ -1,6 +1,6 @@
 % Test of num_deriv() with scalar input
 function result = test_errors ()
-    addpath ("~/Documents/CO2sys")
+    addpath ("~/Software/MATLAB/CO2SYS-MATLAB/src")
     
     PAR1 = 2300;    % Alk
     PAR2 = 2000;    % DIC

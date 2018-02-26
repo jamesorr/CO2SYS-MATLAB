@@ -1,6 +1,6 @@
 % Test of num_deriv() with scalar input
 function [result, headers] = test_errors_2 ()
-    addpath ("~/Documents/CO2sys")
+    addpath ("~/Software/MATLAB/CO2SYS-MATLAB/src")
     
    % 2nd test : 6 records at increasing depth  with NO NUTRIENTS
    % ----------------------------------------
