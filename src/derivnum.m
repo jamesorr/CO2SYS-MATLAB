@@ -231,7 +231,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
                   denom_headers = 'H';
                   denom_units = 'nmol';
                   units = units_at;
-                  PAR1ref = 10.; % nmol/kg (equivalent to pH=8.0)
+                  PAR1ref = 1.0e-8 ; % mol/kg (equivalent to pH=8.0)
                 case 4
                   denom_headers = 'pCO2';
                   denom_units = 'uatm';
@@ -252,7 +252,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             H2 = H(F) + PAR1ref*delta;
             PAR11(F) = -log10(H1) ;
             PAR12(F) = -log10(H2) ;
-            abs_dx(F) = (H2 - H1) * 1e9;
+            abs_dx(F) = (H2 - H1) * 1e9; % now in nmol/kg
            
             G = ~F;
             % Change slightly PAR1
@@ -278,7 +278,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
                   denom_headers = 'H';
                   denom_units = 'nmol';
                   units = units_at;
-                  PAR2ref = 10. ; % nmol/kg (equivalent to pH=8.0)
+                  PAR2ref = 1.0e-8 ; % mol/kg (equivalent to pH=8.0)
                 case 4
                   denom_headers = 'pCO2';
                   denom_units = 'uatm';
