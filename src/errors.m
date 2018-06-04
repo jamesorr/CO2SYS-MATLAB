@@ -25,8 +25,8 @@
 %  [Result,Headers,Units]  = errors(500,    8,5,3,35,25,5,0,4000,15,1,2,0.001,0,0,0,0,'','',0,1,4,1)
 %  [A]                     = errors(2400,2000:10:2400,1,2,35,10,10,0,0,15,2,2,0,0,0,0,'','',0,1,1,4,1)
 %  [A]                     = errors(2400,2200,1,2,0:1:35,0,25,4200,0,15,1,2,2,0,0,0,0,'','',0,1,4,1)
-%  epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02];
-%  eBt = 0.01;
+%  epK = [0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02];
+%  eBt = 0.02;
 %  [A, hdr, units]   = errors(2400,2200,1,2,35,0,25,0:100:4200,0,15,1,2,2,0,0,0,0,epK,eBt,0,1,4,1)
 %  
 %**************************************************************************
@@ -37,7 +37,7 @@
 %   - eS, eT         :  uncertainty of Salinity and Temperature (same units as S and T)
 %   - ePO4, eSI      :  uncertainty of Phosphate and Silicate total concentrations (same units as PO4 and SI [umol/kg])
 %   - epK            :  uncertainty of all seven dissociation constants (a vector) [pK units]
-%   - eBt            :  uncertainty of total boron, given as fractional relative error (eBt=0.01 is a 1% error)
+%   - eBt            :  uncertainty of total boron, given as fractional relative error (eBt=0.02 is a 2% error)
 %   - r              :  correlation coefficient between PAR1 AND PAR2 (typicaly 0)
 %   - others         :  same as input for subroutine  CO2SYS() : scalar or vectors
 %
@@ -48,16 +48,16 @@
 %
 %     if epK is empty (= ''), this routine specifies default values.
 %     These default standard errors are :
-%        pK0   :  0.004 
-%        pK1   :  0.015
-%        pK2   :  0.03
+%        pK0   :  0.002 
+%        pK1   :  0.0075
+%        pK2   :  0.015
 %        pKb   :  0.01    boric acid
 %        pKw   :  0.01    water dissociation
 %        pKspa :  0.02    solubility product of Aragonite 
 %        pKspc :  0.02    solubility product of Calcite
 %
 %   * eBt is a scalar real number, fractional relative error (between 0.00 and 1.00)
-%     for TB, where the default is eBt=0.01. It is assumed to be the same
+%     for TB, where the default is eBt=0.02. It is assumed to be the same
 %     for all rows of data.
 %
 % In constrast, ePAR1, ePAR2, eS, eT, ePO4 and eSI, 
@@ -96,36 +96,46 @@
 % 
 %**************************************************************************
 %
-% OUTPUT: * an array containing standard error (or uncertainty) for the following variables
+% OUTPUT: * an array containing uncertainty for the following variables
 %           (one row per sample):
 %         *  a cell-array containing crudely formatted headers
 %
 %    POS  PARAMETER        UNIT
 %
-%    01 - TAlk                 (umol/kgSW)
-%    02 - TCO2                 (umol/kgSW)
-%    03 - [H+] input           (umol/kgSW)
-%    04 - pCO2 input           (uatm)
-%    05 - fCO2 input           (uatm)
-%    06 - HCO3 input           (umol/kgSW)
-%    07 - CO3 input            (umol/kgSW)
-%    08 - CO2 input            (umol/kgSW)
-%    09 - OmegaCa input        ()
-%    10 - OmegaAr input        ()
-%    11 - xCO2 input           (ppm)
-%    12 - [H+] output          ()
-%    13 - pCO2 output          (uatm)
-%    14 - fCO2 output          (uatm)
-%    15 - HCO3 output          (umol/kgSW)
-%    16 - CO3 output           (umol/kgSW)
-%    17 - CO2 output           (umol/kgSW)
-%    18 - OmegaCa output       ()
-%    19 - OmegaAr output       ()
-%    20 - xCO2 output          (ppm)
+%    01 - TAlk                 (umol/kg)
+%    02 - TCO2                 (umol/kg)
+%    03   fCO2in               (uatm)
+%    04 - HCO3in               (umol/kg)
+%    05 - CO3in                (umol/kg)
+%    06 - CO2in                (umol/kg)
+%    07 - OmegaCAin            ()
+%    08 - OmegaARin            ()
+%    09 - xCO2in               (ppm)
+%    10 - Hout                 (nmol/kg)
+%    11 - pCO2out              (uatm)
+%    12 - fCO2out              (uatm)
+%    13 - HCO3out              (umol/kg)
+%    14 - CO3out               (umol/kg)
+%    15 - CO2out               (umol/kg)
+%    16 - OmegaCAout           ()
+%    17 - OmegaARout           ()
+%    18 - xCO2out              (ppm)
 %
-% Remark : if all input pairs are of the same type, standard error of input pairs are omitted
+% NOTE: Only uncertainties for the output variables are provided.
+%       The 1st 2 columns will change as a function of PAR1TYPE and PAR2TYPE.
+%       In the case above, the input pair is pH-pCO2 (PAR1TYPE=3, PAR2TYPE=4).
+%       That is why the results in the first 2 columns are for the other 2
+%       possible input variables (TAlk and TCO2)
 %
-
+% EXAMPLE: a nice way to see the headers & units along with the results
+%
+% [e, ehead, eunits] = errors (PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,SI,PO4,...
+%                              ePAR1,ePAR2,eSAL,eTEMP,eSI,ePO4,epK,eBt,r,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+%
+%  printf("%s   %s %s %s %s  %s %s %s %s \n", ehead{1:9});
+%  printf("%s   %s  %s    %s %s %s    %s      %s          %s \n", eunits{1:9});
+%  printf("%f  %f  %f  %f  %f %f  %f     %f     %f \n", e(1:9));
+  
 function [total_error, headers, units] = ...
         errors (PAR1, PAR2, PAR1TYPE, PAR2TYPE, SAL, TEMPIN, TEMPOUT, PRESIN, PRESOUT, SI, PO4,...
                 ePAR1, ePAR2, eSAL, eTEMP, eSI, ePO4, epK, eBt, r, ...
@@ -200,7 +210,7 @@ function [total_error, headers, units] = ...
 
     % Default values for epK
     if (isempty(epK))
-        epK = [0.004, 0.015, 0.03, 0.01, 0.01, 0.02, 0.02];
+        epK = [0.002, 0.0075, 0.015, 0.01, 0.01, 0.02, 0.02];
     else
         % Check validity of epK
         if (length(epK) == 1 && epK == 0)
@@ -213,12 +223,12 @@ function [total_error, headers, units] = ...
     
     % Default value for eBt (also check for incorrectly specified values
     if (isempty(eBt))
-        eBt = 0.01;
+        eBt = 0.02;
     elseif ( ~(isscalar(eBt)) )
         error ('invalid parameter eBt (must be scalar): ')
     elseif ( isscalar(eBt))
         if (eBt < 0 || eBt > 1)
-           error ('The "eBt" input argument is the fractional error. It must be between 0 and 1. Default is 0.01 (a 1% error).')
+           error ('The "eBt" input argument is the fractional error. It must be between 0 and 1. Default is 0.02 (a 2% error).')
 	end
     end
 
