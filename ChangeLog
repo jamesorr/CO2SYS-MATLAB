@@ -1,8 +1,15 @@
 ChangeLog
 
+version 2.0.3, 2018-06-04
+-----------------------------------
+	- changed default uncertainties for epK and eBt for consistency with Orr et al. (2018)
+	- new Jupyter notebooks added to demo use of errors, derivnum, CO2SYS routines
+	- corrected derivnum.m units of PAR1ref & PAR2ref [H+]
+	- fixed eBt error calc in errors.m
+
 version 2.0.2, 2017-10-17
 -----------------------------------
-	- correctoins so that errors.m works when there a vectors in input
+	- corrections so that errors.m works when there a vectors in input
 	- changed Octave enhancemnts (!, size, resize) to be MATLAB compatible (~, ...) 
 
 version 2.0.1, 2017-10-11
