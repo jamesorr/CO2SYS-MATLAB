@@ -6,8 +6,12 @@
 
 **CO2SYS-MATLAB versions**
 
-- 1.1 (Sept 2011): van Heuven et al. (2011) 
-- 2.0 (Dec 20, 2016): Orr et al. (2018) - includes uncertainty propagation
+- 1.1   (Sept 2011): van Heuven et al. (2011) 
+- 2.0   (20 Dec 2016): includes uncertainty propagation
+- 2.0.1 (11 Oct 2017): supports TEOS-10 standards (conservattive temperature, absolute salinity)
+- 2.0.2 (17 Oct 2017): Octave enhancements changed to be MATLAB compatible
+- 2.0.3 (4 Jun 2018): examples added as Jupyter notebooks
+- 2.0.4 (10 Nov 2018): defaults for standard uncertainties in constants (epK vector and eBt) made consistent with Orr et al. (2018), i.e., final published version 
 
 **ABOUT CO2SYS**
 
