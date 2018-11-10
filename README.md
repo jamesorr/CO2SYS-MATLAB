@@ -87,9 +87,9 @@ Lewis, E. and Wallace, D. W. R.: Program Developed for CO2 System Calculations,
 ORNL/CDIAC-105, Carbon Dioxide Inf.  Anal. Cent., Oak Ridge Natl. Lab., Oak
 Ridge, Tenn., 38 pp., 1998.
 
-Orr, J. C., J.-P. Gattuso, and J.-M. Epitalon. Comparison of ten packages that
+Orr, J. C., J.-P. Gattuso, and J.-M. Epitalon (2015) Comparison of ten packages that
 compute ocean carbonate chemistry, Biogeosciences, 12, 1483–1510,
-.https://doi.org/10.5194/bg-12-1483-2015 , 2015.
+.https://doi.org/10.5194/bg-12-1483-2015 .
 
 Orr, J.C., J.-M. Epitalon, A. G. Dickson, and J.-P. Gattuso (2018) Routine
 uncertainty propagation for the marine carbon dioxide system, in prep. for
