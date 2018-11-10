@@ -83,9 +83,10 @@ more.
 
 **REFERENCES**
 
-Lewis, E. and Wallace, D. W. R.: Program Developed for CO2 System Calculations,
-ORNL/CDIAC-105, Carbon Dioxide Inf.  Anal. Cent., Oak Ridge Natl. Lab., Oak
-Ridge, Tenn., 38 pp., 1998.
+Lewis, E. and Wallace, D. W. R. (1998) Program Developed for CO2
+System Calculations, ORNL/CDIAC-105, Carbon Dioxide Inf.  Anal. Cent.,
+Oak Ridge Natl. Lab., Oak Ridge, Tenn., 38 pp.,
+https://salish-sea.pnnl.gov/media/ORNL-CDIAC-105.pdf
 
 Orr, J. C., J.-P. Gattuso, and J.-M. Epitalon (2015) Comparison of ten
 packages that compute ocean carbonate chemistry, Biogeosciences, 12,
