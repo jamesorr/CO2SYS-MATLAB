@@ -2,12 +2,12 @@
 
 - If you use any CO2SYS related software, please cite the original work by Lewis and Wallace (1998).
 - If you use CO2SYS.m, please cite van Heuven et al (2011).
-- If you use errors.m or derivnum.m, please cite Orr et al. (2017).
+- If you use errors.m or derivnum.m, please cite Orr et al. (2018).
 
 **CO2SYS-MATLAB versions**
 
 - 1.1 (Sept 2011): van Heuven et al. (2011) 
-- 2.0 (Dec 20, 2016): Orr et al. (2017) - includes uncertainty propagation
+- 2.0 (Dec 20, 2016): Orr et al. (2018) - includes uncertainty propagation
 
 **ABOUT CO2SYS**
 
@@ -26,24 +26,26 @@ dissociation constants, etc.
 
 **HISTORY**
 
-The original version for DOS was written by Lewis and Wallace (1998). That was
-translated to MATLAB by Denis Pierrot at CIMAS, University of Miami, Miami,
-Florida. Then that code was vectorized, refined, and optimized for computational
-speed by Steven van Heuven, University of Groningen, The Netherlands. Although
-functionality was added, the output of the CO2SYS function has not changed in
-form. All versions of CO2SYS that are available at CDIAC (DOS, Excel, MATLAB)
+The original version for DOS was written by Lewis and Wallace
+(1998). That was translated to MATLAB by Denis Pierrot at CIMAS,
+University of Miami, Miami, Florida. Then that code was vectorized,
+refined, and optimized for computational speed by Steven van Heuven,
+University of Groningen, The Netherlands. Although functionality was
+added, the output of the CO2SYS function has not changed in form. All
+versions of CO2SYS that are available at CDIAC (DOS, Excel, MATLAB)
 should produce nearly identical results when supplied with identical
-input. Indeed, close agreement between these different versions of CO2SYS was
-demonstrated by Orr et al. (2015).  In 2016, CO2SYS-MATLAB was modified to
-include error propagation (Orr et al., 2017): the main routine CO2SYS.m was
-slightly modified, while two new routines were added (errors.m and derivnum.m)
+input. Indeed, close agreement between these different versions of
+CO2SYS was demonstrated by Orr et al. (2015).  More recently,
+CO2SYS-MATLAB has been modified to include uncertainty propagation
+(Orr et al., 2018): the main routine CO2SYS.m was altered slightly,
+while two new routines were added (errors.m and derivnum.m)
 
-
-If you discover inconsistencies or have a more general bug report for CO2SYS.m,
-please notify S. van Heuven (svheuven at gmail.com), Denis Pierrot
-(Denis.Pierrot at noaa.gov), or Alex Kozyr (kozyr at ornl.gov). For any concerns
-about the error propagation routines (errors.m and derivnum.m), please contact
-James Orr (james.orr at lsce.ipsl.fr)
+If you discover inconsistencies or have a more general bug report for
+CO2SYS.m, please notify S. van Heuven (svheuven at gmail.com), Denis
+Pierrot (Denis.Pierrot at noaa.gov), or Alex Kozyr (kozyr at
+ornl.gov). For any concerns about the uncertainty propagation routines
+(errors.m and derivnum.m), please contact James Orr (james.orr at
+lsce.ipsl.fr)
 
 **INSTALLING**
 
@@ -65,11 +67,15 @@ errors.m) also work well under octave, GNU's MATLAB clone.
 
 **EXAMPLES**
 
-Example MATLAB scripts demonstrating use of CO2SYS can be found in the examples
-directory. Using the two new routines is similar, adding only a few new
-arguments, e.g., for input uncertainties.  Those examples will be added soon
-using interactive jupyter notebooks in a new 'notebooks' directory. Meanwhile
-just use "help errors" and "help derivnum" to find out more.
+Example MATLAB scripts demonstrating use of CO2SYS can be found in the
+examples directory. Using the two new routines is similar, adding only
+a few new arguments, e.g., for input uncertainties.  More elaborate
+examples are also available in another form in the 'notebooks'
+directory. Either click on those files to visualize them (as HTML) or
+download those files and use them interactively as jupyter
+notebooks. Within MATLAB or octave, you may also use the native help
+facility, i.e., by typing "help errors" or "help derivnum" to find out
+more.
 
 **REFERENCES**
 
@@ -79,15 +85,14 @@ Ridge, Tenn., 38 pp., 1998.
 
 Orr, J. C., J.-P. Gattuso, and J.-M. Epitalon. Comparison of ten packages that
 compute ocean carbonate chemistry, Biogeosciences, 12, 1483–1510,
-doi:10.5194/bg–12–1483–2015, 2015.
+https://doi.org/10.5194/bg–12–1483–2015, 2015.
 
-Orr, J.C., J.-M. Epitalon, A. G. Dickson, and J.-P. Gattuso (2017) Routine
+Orr, J.C., J.-M. Epitalon, A. G. Dickson, and J.-P. Gattuso (2018) Routine
 uncertainty propagation for the marine carbon dioxide system, in prep. for
-Mar. Chem., 2017.
+Mar. Chem., in press, https://doi.org/10.1016/j.marchem.2018.10.006.
 
 van Heuven, S., D. Pierrot, J.W.B. Rae, E. Lewis, and D.W.R. Wallace (2011)
 MATLAB Program Developed for CO2 System Calculations. ORNL/CDIAC-105b.  Carbon
 Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S.
-Department of Energy, Oak Ridge, Tennessee. doi:
-10.3334/CDIAC/otg.CO2SYS_MATLAB_v1.1
+Department of Energy, Oak Ridge, Tennessee. https://doi.org/10.3334/CDIAC/otg.CO2SYS_MATLAB_v1.1
 
