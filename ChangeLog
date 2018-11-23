@@ -1,5 +1,9 @@
 ChangeLog
 
+version 2.0.5, 2018-11-23
+-----------------------------------
+	- fixed error in eBt x deriv (array) - Thanks to Anna Conchon for bug report
+
 version 2.0.4, 2018-11-10
 -----------------------------------
 	- updated README; Orr et al. (2018) published

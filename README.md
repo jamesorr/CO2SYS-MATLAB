@@ -12,6 +12,7 @@
 - 2.0.2 (17 Oct 2017): Octave enhancements changed to be MATLAB compatible
 - 2.0.3 (4 Jun 2018): examples added as Jupyter notebooks
 - 2.0.4 (10 Nov 2018): defaults for standard uncertainties in constants (epK vector and eBt) made consistent with Orr et al. (2018), i.e., final published version 
+- 2.0.5 (23 Nov 2018): fixed bug in eBt propagation to deriv array (thanks A. Cochon)
 
 **ABOUT CO2SYS**
 
