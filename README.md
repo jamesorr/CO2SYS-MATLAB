@@ -13,6 +13,7 @@
 - 2.0.3 (4 Jun 2018): examples added as Jupyter notebooks
 - 2.0.4 (10 Nov 2018): defaults for standard uncertainties in constants (epK vector and eBt) made consistent with Orr et al. (2018), i.e., final published version 
 - 2.0.5 (23 Nov 2018): fixed bug in eBt propagation to deriv array (thanks A. Cochon)
+- 2.1   (29 Jun 2020): fixed bug in derivnum affecting OUT results (linked to TEMPOUT); masked derivs of input vars in derivnum
 
 **ABOUT CO2SYS**
 
