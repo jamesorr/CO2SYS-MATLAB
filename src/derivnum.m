@@ -585,22 +585,4 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             end
     end
 
-
-
-    %derivatives(F)(idx) = NaN
-    
-    %der = derivatives(idx)
-    % derivatives(idx(F)) = NaN
-    %idx=find((PAR1TYPE==3 | PAR2TYPE==3) & headers=='dHout/dT');
-    % idx=find((PAR1TYPE==3 | PAR2TYPE==3));
-    %[is_in_headers, idx] = ismember('dHout/dT', headers);
-    % For PAR1TYPE or PAR2TYPE = 3, make dHout/dT value a NaN
-    
-    %F = (PAR1TYPE==3 | PAR2TYPE==3); % either is pH
-    %derivatives
-    %derivatives(F,:)
-    %ders = derivatives(F)
-    %ders(10) = NaN;
-    %derivatives(F) = ders;
-    %ders
 end
