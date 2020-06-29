@@ -5,8 +5,8 @@
 % dissociation constants, and total boron.
 %
 % It uses central differences, introducing a small perturbation 
-% (plus and minus of a delta) in one input variable and computes the
-% resulting induced change in each output variable
+% (plus and minus of a delta) in one INPUT variable and computes the
+% resulting induced change in each OUTPUT variable
 %
 % After numerical tests, the small PERTURBATION (delta) is chosen
 % as a fraction of a reference value as follows:
@@ -52,33 +52,58 @@
 %
 %**************************************************************************%
 %
-% OUTPUT: * an array containing the derivative of the following parameter (one row per sample):
-%         *  a cell-array containing crudely formatted headers
+% OUTPUT: 3 arrays
+%         a) an array containing the derivative of the following parameter (one row per sample):
+%         b) the corresponding cell-array containing crudely formatted headers
+%         c) the corresponding cell-array containing the units
 %
 %    POS  PARAMETER        UNIT
 %
-%    01 - TAlk                 (umol/kgSW)
-%    02 - TCO2                 (umol/kgSW)
-%    03 - [H+] input           (umol/kgSW)
-%    04 - pCO2 input           (uatm)
-%    05 - fCO2 input           (uatm)
-%    06 - HCO3 input           (umol/kgSW)
-%    07 - CO3 input            (umol/kgSW)
-%    08 - CO2 input            (umol/kgSW)
-%    09 - OmegaCa input        ()
-%    10 - OmegaAr input        ()
-%    11 - xCO2 input           (ppm)
-%    12 - [H+] output          ()
-%    13 - pCO2 output          (uatm)
-%    14 - fCO2 output          (uatm)
-%    15 - HCO3 output          (umol/kgSW)
-%    16 - CO3 output           (umol/kgSW)
-%    17 - CO2 output           (umol/kgSW)
-%    18 - OmegaCa output       ()
-%    19 - OmegaAr output       ()
-%    20 - xCO2 output          (ppm)
+%    01 - TAlk              (umol/kgSW)
+%    02 - TCO2              (umol/kgSW)
+%    03 - [H+] in           (umol/kgSW)
+%    04 - pCO2 in           (uatm)
+%    05 - fCO2 in           (uatm)
+%    06 - HCO3 in           (umol/kgSW)
+%    07 - CO3 in            (umol/kgSW)
+%    08 - CO2 in            (umol/kgSW)
+%    09 - OmegaCa in        ()
+%    10 - OmegaAr in        ()
+%    11 - xCO2 in           (ppm)
+%    12 - [H+] out          ()
+%    13 - pCO2 out          (uatm)
+%    14 - fCO2 out          (uatm)
+%    15 - HCO3 out          (umol/kgSW)
+%    16 - CO3 out           (umol/kgSW)
+%    17 - CO2 out           (umol/kgSW)
+%    18 - OmegaCa out       ()
+%    19 - OmegaAr out       ()
+%    20 - xCO2 out          (ppm)
 %
-% Remark : if all input pairs are of the same type, derivatives of input pairs are omitted
+% * 'in'  refers to INPUT  conditions (TEMPIN, PRESIN) as for CO2SYS
+%   'out' refers to OUTPUT conditions (TEMPOUT, PRESOUT)
+%
+% Note: derivnum does not take derivatives of the two CO2 system input vars.
+%       Hence 2 out of the first 5 results listed above will be omitted.
+%       The index (POS) will be shifted accordingly 
+%       (always beginning at 1 and ending at 18):
+%       * with the TAlk-TCO2 input pair, POS=1 corresponds to ([H+]in)';
+%       * with the TAlk-pCO2 pair, POS = 1,2,3 are (TCO2in)', ([H+]in)', (fCO2in)';
+%       * POS 18 is always for (xCO2out)'.
+%
+% CAUTION: derivnum.m is NOT designed to take partial derivatives of
+%          input vars, only computed variables relative to input
+%          variables. However, those partial derivatives of input vars are
+%          kept in the OUT conditions to maintain consistency
+%          of the order of output between the different input pairs.
+%          Derivatives of input vars are included when pH, pCO2, or fCO2 is
+%          a member of the input pair (e.g., pH-Alk, pCO2-DIC, or
+%          pH-pCO2). These partial derivatives of input vars are
+%          not used by the "errors.m" function (for uncertainty propagation). 
+%          Generally, we advise not to use these derivatives of input
+%          variables: in some cases their results appear accurate
+%          while in other cases their results have been masked with
+%          a NaN. Use them at your own risk.  
 %
 function [derivatives, headers, units, headers_err, units_err] = ...
         derivnum (VARID,PAR1,PAR2,PAR1TYPE,PAR2TYPE, SAL,TEMPIN, ...
@@ -162,12 +187,14 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     % no change on PAR1 and PAR2
     PAR11 = PAR1; PAR12 = PAR1;
     PAR21 = PAR2; PAR22 = PAR2;
-    % no change on Sil total and Phos total
+    % no change in Sil total and Phos total (except for d/dSi, d/dPO4)
     SI1 = SI; SI2 = SI;
     PO41  = PO4; PO42  = PO4;
-    % no change on T and S
-    TEMP1 = TEMPIN; TEMP2 = TEMPIN;
+    % no change in S and T  (except for d/dS and d/dT, respectively)
     SAL1 = SAL; SAL2 = SAL;
+    TEMP1 = TEMPIN; TEMP2 = TEMPIN;
+    % no change in TEMPOUT except for d/dT (see why further below)
+    TEMPOUT1 = TEMPOUT; TEMPOUT2 = TEMPOUT;
 
     % Create empty vector for abs_dx (absolute delta)
     abs_dx  = nan(ntps,1);
@@ -311,7 +338,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
        case {'SIL', 'TSIL', 'SILT', 'SILICATE', 'SIT'}    % Sil total
             % Define a relative delta
             delta = 1.e-3;
-            SIref = 7.5; % umol/kg (global surface average, Orr et al., 2017)
+            SIref = 7.5; % umol/kg (global surface average, Orr et al., 2018)
             % Change slightly temperature
             SI1 = SI - SIref*delta;
             SI2 = SI + SIref*delta;
@@ -322,7 +349,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
        case {'PHOS', 'TPHOS', 'PHOST', 'PHOSPHATE', 'PT'}    % Phos total
             % Define a relative delta
             delta = 1.e-3;
-            PO4ref = 0.5; % umol/kg (global surface average, Orr et al., 2017)
+            PO4ref = 0.5; % umol/kg (global surface average, Orr et al., 2018)
             % Change slightly temperature
             PO41 = PO4 - PO4ref*delta;
             PO42 = PO4 + PO4ref*delta;
@@ -338,6 +365,11 @@ function [derivatives, headers, units, headers_err, units_err] = ...
             TEMP1 = TEMPIN - TEMPref*delta;
             TEMP2 = TEMPIN + TEMPref*delta;
             abs_dx = TEMP2 - TEMP1;
+            % When computing d/dT
+            % TEMPOUT changes must be the same as TEMPIN changes, e.g, for
+            % derivnum 'OUT' & 'IN' results to be the same when TEMPOUT=TEMPIN
+            TEMPOUT1 = TEMPOUT - TEMPref*delta;
+            TEMPOUT2 = TEMPOUT + TEMPref*delta;
             denom_headers = 'T';
             denom_units = 'C';
             units = units_kg;
@@ -364,7 +396,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
         Perturb = -perturbation;
     end
     cdel1 = CO2SYS ( ...
-        PAR11,PAR21,PAR1TYPE,PAR2TYPE,SAL1,TEMP1,TEMPOUT,PRESIN,PRESOUT,SI1,PO41,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        PAR11,PAR21,PAR1TYPE,PAR2TYPE,SAL1,TEMP1,TEMPOUT1,PRESIN,PRESOUT,SI1,PO41,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     % Compute [H+]
     if (ndims(cdel1) == 2)
         Hin = 10.^(-cdel1(:,3))   * 1.e9; % to show H+ results in nmol/kg
@@ -383,7 +415,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
         Perturb = perturbation;
     end
     cdel2 = CO2SYS ( ...
-        PAR12,PAR22,PAR1TYPE,PAR2TYPE,SAL2,TEMP2,TEMPOUT,PRESIN,PRESOUT,SI2,PO42,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
+        PAR12,PAR22,PAR1TYPE,PAR2TYPE,SAL2,TEMP2,TEMPOUT2,PRESIN,PRESOUT,SI2,PO42,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS);
     % Compute [H+]
     if (ndims(cdel2) == 2)
         % Computed variable H+ (does not affect other computed
@@ -403,28 +435,28 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     end
     
     % Drop unnecessary columns
-    % Note: colums (04 - pHin) and (20 - pHout) drop    
+    % Note: columns (04 - pHin) and (20 - pHout) drop    
     % Keep only the following columns
-    %    01 - TAlk                 (umol/kgSW)
-    %    02 - TCO2                 (umol/kgSW)
-    %    03 - [H+] input           (nmol/kgSW)  lastly added
-    %    05 - pCO2 input           (uatm)
-    %    06 - fCO2 input           (uatm)
-    %    07 - HCO3 input           (umol/kgSW)
-    %    08 - CO3 input            (umol/kgSW)
-    %    09 - CO2 input            (umol/kgSW)
-    %    16 - OmegaCa input        ()
-    %    17 - OmegaAr input        ()
-    %    18 - xCO2 input           (ppm)
-    %    19 - [H+] output          (nmol/kgSW)  lastly added
-    %    21 - pCO2 output          (uatm)
-    %    22 - fCO2 output          (uatm)
-    %    23 - HCO3 output          (umol/kgSW)
-    %    24 - CO3 output           (umol/kgSW)
-    %    25 - CO2 output           (umol/kgSW)
-    %    32 - OmegaCa output       ()
-    %    33 - OmegaAr output       ()
-    %    34 - xCO2 output          (ppm)
+    %    01 - TAlk              (umol/kgSW)
+    %    02 - TCO2              (umol/kgSW)
+    %    03 - [H+] in           (nmol/kgSW)  lastly added
+    %    05 - pCO2 in           (uatm)
+    %    06 - fCO2 in           (uatm)
+    %    07 - HCO3 in           (umol/kgSW)
+    %    08 - CO3 in            (umol/kgSW)
+    %    09 - CO2 in            (umol/kgSW)
+    %    16 - OmegaCa in        ()
+    %    17 - OmegaAr in        ()
+    %    18 - xCO2 in           (ppm)
+    %    19 - [H+] out          (nmol/kgSW)  lastly added
+    %    21 - pCO2 out          (uatm)
+    %    22 - fCO2 out          (uatm)
+    %    23 - HCO3 out          (umol/kgSW)
+    %    24 - CO3 out           (umol/kgSW)
+    %    25 - CO2 out           (umol/kgSW)
+    %    32 - OmegaCa out       ()
+    %    33 - OmegaAr out       ()
+    %    34 - xCO2 out          (ppm)
     keep = [1 2 3 5 6 7 8 9 16 17 18 19 21 22 23 24 25 32 33 34];
     
     % We will drop also some column headers
@@ -484,6 +516,7 @@ function [derivatives, headers, units, headers_err, units_err] = ...
     units_err = units_err(keep_head);
     
     % concatenate strings to give each header its proper form, a partial derivative
+    % headers_vars = headers;
     headers = strcat('d', headers, '/', 'd', denom_headers);
     % concatenate in an analogous way for the units
     units   = strcat('(',units, '/', denom_units,')');
@@ -498,5 +531,76 @@ function [derivatives, headers, units, headers_err, units_err] = ...
         derivatives = bsxfun(@rdivide, dy, abs_dx);
     end
 
+    % Mask values that should not be used with NaN (e.g., dHout/dT when PAR1 or PAR2 is pH)
+    switch VARID
+        case {'T', 'TEMP', 'TEMPERATURE'}
+            % For PAR1TYPE or PAR2TYPE = 3 (pH is input) make dHout/dT value a NaN
+            F = (PAR1TYPE==3 | PAR2TYPE==3); % either CO2 system input variable is pH
+            [is_in_headers, idx] = ismember('dHout/dT', headers);
+            if any(is_in_headers)
+                derivatives(F,idx) = NaN ;
+            end
+            %
+            %% For PAR1TYPE or PAR2TYPE = 4 or 5 (pCO2 or fCO2 is input) make relevant d/dT values NaNs
+            %F = (PAR1TYPE==4 | PAR2TYPE==4 | PAR1TYPE==5 | PAR2TYPE==5); %when pCO2 or fCO2 is input var
+            %% masknan = {'dpCO2in/dT' 'dfCO2in/dT' 'dxCO2in/dT' 'dpCO2out/dT' 'dfCO2out/dT' 'dxCO2out/dT'};
+            %masknan = {'dpCO2out/dT' 'dfCO2out/dT'};
+            %[is_in_headers, idx] = ismember(masknan, headers);
+            %if any(is_in_headers)
+            %    derivatives(F,idx) = NaN ;
+            %end
+            %
+            % For PAR1TYPE or PAR2TYPE = 4 or 5 (pCO2 or fCO2 is input) make relevant d/dT values NaNs
+            F = (PAR1TYPE==4 | PAR2TYPE==4); %when pCO2 or fCO2 is input var
+            % masknan = {'dfCO2in/dT' 'dxCO2in/dT' 'dpCO2out/dT' 'dfCO2out/dT' 'dxCO2out/dT'};
+            masknan = {'dpCO2out/dT'};
+            [is_in_headers, idx] = ismember(masknan, headers);
+            if any(is_in_headers)
+                derivatives(F,idx) = NaN ;
+            end
+            %
+            % For PAR1TYPE or PAR2TYPE = 5 (fCO2 is input) make relevant d/dT values NaNs
+            F = (PAR1TYPE==5 | PAR2TYPE==5); %when fCO2 is input var
+            % masknan = {'dfCO2in/dT' 'dxCO2in/dT' 'dpCO2out/dT' 'dfCO2out/dT' 'dxCO2out/dT'};
+            masknan = {'dfCO2out/dT'};
+            [is_in_headers, idx] = ismember(masknan, headers);
+            if any(is_in_headers)
+                derivatives(F,idx) = NaN ;
+            end
+        case {'PAR1', 'VAR1'}
+            % For pH-pCO2 or pH-fCO2 pair (PAR1 is pH) 
+            F = (PAR1TYPE==3 & (PAR2TYPE==4 | PAR2TYPE==5));
+            masknan = {'dHout/dH' 'dpCO2out/dH' 'dfCO2out/dH'};
+            [is_in_headers, idx] = ismember(masknan, headers);
+            if any(is_in_headers)
+                derivatives(F,idx) = NaN ;
+            end
+        case {'PAR2', 'VAR2'}
+            % For pCO2-pH or fCO2-pH pair (PAR2 is pH)
+            F = ((PAR1TYPE==4 | PAR1TYPE==5) & PAR2TYPE==3);
+            masknan = {'dHout/dH' 'dpCO2out/dH' 'dfCO2out/dH'};
+            [is_in_headers, idx] = ismember(masknan, headers);
+            if any(is_in_headers)
+                derivatives(F,idx) = NaN ;        
+            end
+    end
 
+
+
+    %derivatives(F)(idx) = NaN
+    
+    %der = derivatives(idx)
+    % derivatives(idx(F)) = NaN
+    %idx=find((PAR1TYPE==3 | PAR2TYPE==3) & headers=='dHout/dT');
+    % idx=find((PAR1TYPE==3 | PAR2TYPE==3));
+    %[is_in_headers, idx] = ismember('dHout/dT', headers);
+    % For PAR1TYPE or PAR2TYPE = 3, make dHout/dT value a NaN
+    
+    %F = (PAR1TYPE==3 | PAR2TYPE==3); % either is pH
+    %derivatives
+    %derivatives(F,:)
+    %ders = derivatives(F)
+    %ders(10) = NaN;
+    %derivatives(F) = ders;
+    %ders
 end
