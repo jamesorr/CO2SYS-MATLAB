@@ -95,8 +95,8 @@ packages that compute ocean carbonate chemistry, Biogeosciences, 12,
 1483–1510, https://doi.org/10.5194/bg-12-1483-2015 .
 
 Orr, J.C., J.-M. Epitalon, A. G. Dickson, and J.-P. Gattuso (2018) Routine
-uncertainty propagation for the marine carbon dioxide system, in prep. for
-Mar. Chem., in press, https://doi.org/10.1016/j.marchem.2018.10.006.
+uncertainty propagation for the marine carbon dioxide system,
+Mar. Chem., 207, Pages 84–107, https://doi.org/10.1016/j.marchem.2018.10.006.
 
 van Heuven, S., D. Pierrot, J.W.B. Rae, E. Lewis, and D.W.R. Wallace (2011)
 MATLAB Program Developed for CO2 System Calculations. ORNL/CDIAC-105b.  Carbon
