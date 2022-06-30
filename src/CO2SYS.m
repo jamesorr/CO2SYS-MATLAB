@@ -1506,23 +1506,41 @@ pHx(1:vl,1) = pHGuess; % creates a vector holding the first guess for all sample
 deltapH     = pHTol+1;
 while any(abs(deltapH) > pHTol)
     H         = 10.^(-pHx);
+    dH_dpHx = -ln10 .* H;
     Denom     = (H.*H + K1F.*H + K1F.*K2F);
+    dDenom_dH = K1F + 2 * H;
     CAlk      = TCx.*K1F.*(H + 2.*K2F)./Denom;
+    dCAlk_dH = (K1F .* TCx - dDenom_dH .* CAlk) ./ Denom;
     BAlk      = TBF.*KBF./(KBF + H);
+    dBAlk_dH = -BAlk ./ (KBF + H);
     OH        = KWF./H;
+    dOH_dH = -KWF ./ (H .* H);
     PhosTop   = KP1F.*KP2F.*H + 2.*KP1F.*KP2F.*KP3F - H.*H.*H;
+    dPhosTop_dH = KP1F .* KP2F - 3 * H .* H;
     PhosBot   = H.*H.*H + KP1F.*H.*H + KP1F.*KP2F.*H + KP1F.*KP2F.*KP3F;
+    dPhosBot_dH = 3 * H .* H + KP1F .* KP2F + 2 * H .* KP1F;
     PAlk      = TPF.*PhosTop./PhosBot;
+    dPAlkex_dPhosTop = TPF ./ PhosBot;
+    dPAlkex_dPhosBot = -PhosTop .* TPF ./ (PhosBot .* PhosBot);
+    dPAlk_dH = dPAlkex_dPhosTop .* dPhosTop_dH + dPAlkex_dPhosBot .* dPhosBot_dH;
     SiAlk     = TSiF.*KSiF./(KSiF + H);
+    dSiAlk_dH = -SiAlk ./ (H + KSiF);
     FREEtoTOT = (1 + TSF./KSF); % pH scale conversion factor
     Hfree     = H./FREEtoTOT; % for H on the total scale
+    dHfree_dH = 1 ./ FREEtoTOT;
     HSO4      = TSF./(1 + KSF./Hfree); % since KS is on the free scale
+    dHSO4_dHfree = KSF / (Hfree .* Hfree) .* HSO4 ./ (1 .+ KSF ./ Hfree);
+    dHSO4_dH = dHSO4_dHfree .* dHfree_dH;
     HF        = TFF./(1 + KFF./Hfree); % since KF is on the free scale
+    dHF_dHfree = KFF / (Hfree .* Hfree) .* HF ./ (1 .+ KFF ./ Hfree);
+    dHF_dH = dHF_dHfree .* dHfree_dH;
     Residual  = TAx - CAlk - BAlk - OH - PAlk - SiAlk + Hfree + HSO4 + HF;
+
     % find Slope dTA/dpH;
-    % (this is not exact, but keeps all important terms);
-    Slope     = ln10.*(TCx.*K1F.*H.*(H.*H + K1F.*K2F + 4.*H.*K2F)./Denom./Denom + BAlk.*H./(KBF + H) + OH + H);
-    deltapH   = Residual./Slope; % this is Newton's method
+    % (this is now exact!) 
+    Slope     = dH_dpHx .* (-dCAlk_dH - dBAlk_dH - dOH_dH - dPAlk_dH - dSiAlk_dH + dHfree_dH + dHSO4_dH + dHF_dH);
+    deltapH   = -Residual./Slope; % this is Newton's method
+
     % to keep the jump from being too big;
     while any(abs(deltapH) > 1)
         FF=abs(deltapH)>1; deltapH(FF)=deltapH(FF)./2;
