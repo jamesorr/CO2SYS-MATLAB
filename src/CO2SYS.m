@@ -1529,15 +1529,15 @@ while any(abs(deltapH) > pHTol)
     Hfree     = H./FREEtoTOT; % for H on the total scale
     dHfree_dH = 1 ./ FREEtoTOT;
     HSO4      = TSF./(1 + KSF./Hfree); % since KS is on the free scale
-    dHSO4_dHfree = KSF / (Hfree .* Hfree) .* HSO4 ./ (1 .+ KSF ./ Hfree);
+    dHSO4_dHfree = KSF ./ (Hfree .* Hfree) .* HSO4 ./ (1 + KSF ./ Hfree);
     dHSO4_dH = dHSO4_dHfree .* dHfree_dH;
     HF        = TFF./(1 + KFF./Hfree); % since KF is on the free scale
-    dHF_dHfree = KFF / (Hfree .* Hfree) .* HF ./ (1 .+ KFF ./ Hfree);
+    dHF_dHfree = KFF ./ (Hfree .* Hfree) .* HF ./ (1 + KFF ./ Hfree);
     dHF_dH = dHF_dHfree .* dHfree_dH;
     Residual  = TAx - CAlk - BAlk - OH - PAlk - SiAlk + Hfree + HSO4 + HF;
 
     % find Slope dTA/dpH;
-    % (this is now exact!) 
+    % (this is now exact!)
     Slope     = dH_dpHx .* (-dCAlk_dH - dBAlk_dH - dOH_dH - dPAlk_dH - dSiAlk_dH + dHfree_dH + dHSO4_dH + dHF_dH);
     deltapH   = -Residual./Slope; % this is Newton's method
 
